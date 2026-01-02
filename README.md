@@ -19,14 +19,14 @@ The fluorescence microscope was self-built using the Rapid Automated Modular Mic
 
 ### Z-movement: Self-built linear translation stage
 * Servo motor (controlled by Arduino Uno)
-* Miniaturized guide and slide block: MGN9R, MGN9H by Dold Mechatronik
+* Miniaturized guide and slide block: MGN9R and MGN9H by Dold Mechatronik
 * 3D printed mount and gear wheel
 * Microswitch as a proximity detection sensor
 
 ### Circuit for pump and servo control
 ![circuit](/images/circuit.png)
+1: Solenoid valve, 2: Relay, 3: Power supply, 4: Servo motor.
 
-## Developing a web app as a user interface
-![gui_v2](/images/gui_v2.png)
-
-## Benchmarking
+## Developing a web app as a user interface using Flask
+Status quo:
+![gui](/images/gui.png)
