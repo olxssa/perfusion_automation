@@ -24,7 +24,7 @@ The fluorescence microscope was self-built using the Rapid Automated Modular Mic
 * Microswitch as a proximity detection sensor
 
 ### Circuit for pump and servo control
-![circuit](/images/solenoid_Steckplatine_sensor.pdf)
+![circuit](/images/solenoid_Steckplatine_sensor.png)
 1: Solenoid valve, 2: Relay, 3: Power supply, 4: Servo motor.
 
 ## Developing a web app as a user interface using Flask
