@@ -29,4 +29,4 @@ The fluorescence microscope was self-built using the Rapid Automated Modular Mic
 
 ## Developing a web app as a user interface using Flask
 Status quo:
-![gui](/images/gui.png)
+![gui](/images/webapp_currentstate.mp4)
