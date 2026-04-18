@@ -28,5 +28,8 @@ The fluorescence microscope was self-built using the Rapid Automated Modular Mic
 1: Solenoid valve, 2: Relay, 3: Power supply, 4: Servo motor.
 
 ## Developing a web app as a user interface using Flask
-Status quo:
-![gui](/images/webapp_currentstate.png)
+Status quo: 
+
+[![](https://img.youtube.com/vi/6NS1tuH9CTA/0.jpg)](https://youtu.be/6NS1tuH9CTA "Click to play on Youtube.com")
+
+Click on images to play on Youtube.com
