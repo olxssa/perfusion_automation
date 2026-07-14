@@ -1,0 +1,57 @@
+body {
+  background-color: #121212;  /* deep black background */
+  color: #f0f0f0;             /* light text */
+}
+
+.column {
+  border: 1px solid #333;     /* darker gray border */
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #1e1e1e;  /* dark gray panel background */
+  height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+h5 {
+  background-color: #2b2b2b;  /* darker section headers */
+  color: #f8f9fa;             /* light header text */
+  padding: 6px;
+  border-radius: 4px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.preview-box {
+  background-color: #000;     /* true black for image area */
+  height: 300px;
+  border: 2px solid #555;     /* subtle gray border */
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+/* Buttons and form elements */
+.btn {
+  color: #f0f0f0;
+  border-color: #555;
+}
+
+.btn:hover {
+  background-color: #444;
+}
+
+input, select {
+  background-color: #2a2a2a;
+  color: #f0f0f0;
+  border: 1px solid #444;
+}
+
+input:focus, select:focus {
+  background-color: #333;
+  color: #fff;
+  border-color: #888;
+  outline: none;
+}
+
+hr {
+  border-top: 1px solid #444;
+}
