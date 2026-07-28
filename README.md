@@ -8,7 +8,7 @@ Public project repository about an automated multi-well perfusion and imaging sy
 ### 3D printed parts
 
 ### Software
-<img src="/images/img_design.png" width="500">
+<img src="/images/img_design.png" width="920">
 
 After the build the setup can be either used via a custom-developed web application or script-based with a Jupyter Notebook. Furthermore, the scripts core_methods.py and cellpose_worker.py are neccessary for both to work. 
 
