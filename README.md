@@ -61,7 +61,11 @@ Wiring of the electrical circuit. A: RX System with Arduino Uno Rev 3 with Servo
 #### Communication Protocols
 
 #### Core Functional Methods
+##### Perfusion Experiment
 <img src="/images/perfusion_experiment.png" width="500">
+
+##### Stop Button
+<img src="/images/stop_button.png" width="500">
 
 ### Status quo: 
 [![](https://img.youtube.com/vi/6NS1tuH9CTA/0.jpg)](https://youtu.be/6NS1tuH9CTA "Click to play on Youtube.com")
