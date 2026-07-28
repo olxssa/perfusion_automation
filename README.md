@@ -49,7 +49,7 @@ Wiring of the fluidic circuit. A: Pressure distribution system. B: Reservoirs wi
 Micro-valve circuit and channel numbering. D: Perfusion site with precise volume exchange.
 
 #### Electrical circuits
-<img src="/images/electrical_circuit.png" width="500">
+<img src="/images/electrical_circuit_v2.png" width="500">
 Wiring of the electrical circuit. A: RX System with Arduino Uno Rev 3 with Servos, Solenoid-Valves and Neopixel Ring. B: TX System with Xiao ESP32-S3 with Sensors and Abort button.
 
 ### Developing a custom web app as a user interface using Flask
