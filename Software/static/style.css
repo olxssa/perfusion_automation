@@ -1,0 +1,671 @@
+/* =========================
+   GLOBAL & LAYOUT
+========================= */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #09090b;
+    color: #e4e4e7;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+}
+
+.container {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    position: relative;
+}
+
+.column,
+.controls > div {
+    flex: 1;
+}
+
+.flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.controls {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.controls > div {
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================
+   TYPOGRAPHY & CARDS
+========================= */
+.dev-name {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 14px;
+    color: #71717a;
+}
+
+.header,
+.field-label,
+.modal-content button,
+#start_perfusion,
+#clean_syringe_pumps,
+.btn-run,
+.btn-compact,
+.full-width-btn,
+.well-selector-item .well-label,
+.summary-toggle-label,
+.view-toggle-label,
+.segmented-btn {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.header,
+.field-label,
+.well-selector-item .well-label,
+.summary-toggle-label,
+.view-toggle-label,
+.segmented-btn {
+    color: #a1a1aa;
+}
+
+.header { font-size: 14px; }
+.field-label { font-size: 14px; }
+
+.card {
+    background: #18181b;
+    padding: 8px 16px 16px 16px; /* Top, Right, Bottom, Left */
+    border-radius: 6px;
+    border: 1px solid #27272a;
+    margin-bottom: 16px;
+}
+
+/* =========================
+   PREVIEW & MEDIA
+========================= */
+.preview-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.preview-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.preview-settings {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.preview-box {
+    object-fit: cover;
+    background: #000;
+    border: 1px solid #27272a;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+#exposure { width: 75px; }
+
+/* =========================
+   BUTTONS, INPUTS & FORMS
+========================= */
+button, select, input[type="text"], input[type="number"] {
+    font-family: inherit;
+    font-size: 13px;
+    background: #09090b;
+    color: #fff;
+    border: 1px solid #27272a;
+    border-radius: 4px;
+    padding: 6px 12px;
+    outline: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+button {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+button:hover {
+    background: #18181b;
+    border-color: #3f3f46;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;            /* Space between buttons */
+    justify-content: flex-start; /* Align to the right (use flex-start for left) */
+    margin-top: 15px;     /* Optional spacing above buttons */
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Adjust vertical spacing here */
+}
+
+select {
+    width: 100%;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 32px;
+}
+
+/* Accent Buttons */
+.modal-content button,
+#start_perfusion,
+.btn-run,
+.toggle.active,
+.xy-buttons button,
+.z-buttons button,
+.well-selector-item input[type="checkbox"]:checked,
+.summary-toggle-label input[type="checkbox"]:checked,
+.view-toggle-label input[type="checkbox"]:checked,
+.segmented-btn.active {
+    background: #2e7d6b;
+}
+
+#clean_syringe_pumps{
+    background: #6c757d;
+}
+
+.modal-content button,
+#start_perfusion,
+.btn-run {
+    color: #fff;
+    font-size: 13px;
+}
+
+.modal-content button:hover,
+#start_perfusion:hover,
+.btn-run:hover {
+    background: #059669;
+    border-color: #047857;
+}
+
+/* State Actions */
+.exit, #abortBtn {
+    background: #dc2626;
+    border-color: #b91c1c;
+    color: #fff;
+}
+
+.exit:hover, #abortBtn:hover {
+    background: #b91c1c;
+    border-color: #991b1b;
+}
+
+.exit, #start_perfusion { width: 100%; font-size: 14px; }
+
+#clean_syringe_pumps {
+    width: 50%;
+    font-size: 12px;
+    display: block;
+    margin: 0 auto; /* Centers the block horizontally */
+}
+
+.btn-run.stop-state {
+    background-color: #212529;
+    color: #fff;
+    border: 1px solid #000;
+}
+.btn-run.stop-state:hover { background-color: #000; }
+
+.btn-compact {
+    width: 54px;
+    height: 31px;
+    font-size: 14px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 0;
+}
+
+#openNewTabBtn {
+    background-color: #e0e0e0 !important;
+    color: #555555 !important;
+    border: 1px solid #cccccc !important;
+
+    /* Layout & Centering */
+    height: 31px !important;
+    width: auto !important; /* Auto-expands for full text visibility */
+    padding: 0 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+
+    /* Typography & Aesthetics */
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+#openNewTabBtn:hover {
+    background-color: #d0d0d0 !important;
+    color: #333333 !important;
+}
+
+.full-width-btn {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+.btn-delete {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #71717a;
+    font-size: 16px;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.btn-delete:hover {
+    background: #27272a;
+    color: #ef4444;
+    border-color: #3f3f46;
+}
+
+/* Input Groups */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #09090b;
+    border: 1px solid #27272a;
+    border-radius: 4px;
+    padding: 0 10px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#exposure-wrapper { width: 100px; }
+
+.input-wrapper input {
+    border: none !important;
+    background: transparent !important;
+    padding: 6px 0 !important;
+    width: 100%;
+    outline: none;
+    color: #fff;
+}
+
+.input-wrapper:focus-within {
+    border-color: #2e7d6b;
+    box-shadow: 0 0 0 1px #2e7d6b;
+}
+
+.unit {
+    font-size: 14px;
+    color: #71717a;
+    font-weight: 500;
+    margin-left: 6px;
+    user-select: none;
+}
+
+.input-wrapper input::-webkit-outer-spin-button,
+.input-wrapper input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.input-wrapper input[type="number"] { -moz-appearance: textfield; }
+.input-wrapper input::placeholder { color: #52525b; opacity: 1; }
+
+/* =========================
+   GRIDS & LAYOUT MODIFIERS
+========================= */
+.image-grid {
+    display: grid;
+    align-items: center;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 16px;
+    margin-top: 16px;
+}
+
+.grid-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+}
+
+.perfusion_buttons, #solutions, #multi-well, .sequence-row, .autofocus {
+    display: grid;
+    gap: 8px;
+    align-items: center;
+}
+
+.perfusion_buttons { grid-template-columns: 1fr 1fr auto; }
+#solutions { grid-template-columns: 1.3fr 4fr auto; }
+#multi-well { grid-template-columns: 1fr 1fr 1fr auto; }
+.autofocus { grid-template-columns: 1fr 1fr auto; }
+
+.time, .imaging_freq {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 8px;
+    align-items: center;
+    width: 50%;
+}
+
+#sequence {
+    display: flex;
+    flex-direction: column;
+    row-gap: 6px;
+    margin-top: 6px;
+}
+
+.settings-row, .imaging-row { display: flex; gap: 48px; }
+.settings-row { align-items: center; }
+.imaging-row { align-items: flex-start; }
+
+.step { margin-top: 12px; }
+.step input { width: 64px; }
+.step .input-wrapper { width: 90px; }
+
+.settings-inline-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+.settings-inline-row .input-group { flex: 1; }
+.settings-inline-row .input-wrapper,
+.sequence-row .input-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.control-block {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.no-flex { flex: none !important; }
+.layout-compact { gap: 25px !important; }
+.layout-compact .input-group { flex: 1; min-width: 0; }
+.af-input-width { width: 150px !important; box-sizing: border-box; }
+.timing-input-width, .freq-input-width { width: 300px !important; }
+.space-bottom { margin-bottom: 20px; }
+
+.sequence-row {
+    grid-template-columns: 80px 1fr 150px auto;
+    width: 100%;
+}
+
+.order-number {
+    font-size: 14px;
+    color: #71717a;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* =========================
+   XY / Z CONTROLS
+========================= */
+.xy-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 32px);
+    grid-template-rows: repeat(3, 32px);
+    justify-items: center;
+    align-items: center;
+    gap: 4px;
+}
+
+.xy-buttons button, .z-buttons button {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.z-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+/* =========================
+   OVERLAYS & MODALS
+========================= */
+.spinner {
+    border: 3px solid #27272a;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+#loadingOverlay, .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(4px);
+}
+
+#loadingOverlay {
+    display: none;
+    background: rgba(9, 9, 11, 0.7);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #fff;
+    font-size: 20px;
+}
+
+.modal {
+    display: block;
+    z-index: 1000;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    background-color: #18181b;
+    border: 1px solid #27272a;
+    margin: 1% auto;
+    padding: 24px;
+    border-radius: 8px;
+    width: 1000px;
+    color: #f4f4f5;
+    text-align: left;
+    font-size: 16px;
+}
+
+#instructionModal .modal-content h3 {
+    color: #4180bf !important; /* Standard bright blue (or use #2c3e50 / #1a73e8) */
+}
+
+.modal-content button {
+    padding: 8px 16px;
+    background: #10b981;
+    border-color: #059669;
+}
+.modal-content button:hover { background: #059669; }
+
+/* =========================
+   WELL SELECTOR & TOGGLES
+========================= */
+.well-selector-grid {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 16px;
+    background: #09090b;
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid #27272a;
+}
+
+.well-selector-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid #27272a;
+    border-radius: 4px;
+    background: #18181b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.well-selector-item .well-label { margin-bottom: 6px; }
+
+.well-selector-item input[type="checkbox"],
+.summary-toggle-label input[type="checkbox"],
+.view-toggle-label input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid #27272a;
+    border-radius: 3px;
+    background: #09090b;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+    outline: none;
+}
+
+.well-selector-item input[type="checkbox"] { width: 14px; height: 14px; }
+.summary-toggle-label input[type="checkbox"],
+.view-toggle-label input[type="checkbox"] { width: 16px; height: 16px; }
+
+.well-selector-item input[type="checkbox"]:checked,
+.summary-toggle-label input[type="checkbox"]:checked,
+.view-toggle-label input[type="checkbox"]:checked {
+    border-color: #2e7d6b;
+}
+
+.well-selector-item input[type="checkbox"]:checked::after,
+.summary-toggle-label input[type="checkbox"]:checked::after,
+.view-toggle-label input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.well-selector-item input[type="checkbox"]:checked::after { left: 4px; top: 1px; width: 4px; height: 8px; }
+.summary-toggle-label input[type="checkbox"]:checked::after,
+.view-toggle-label input[type="checkbox"]:checked::after { left: 5px; top: 2px; width: 4px; height: 8px; }
+
+.well-selector-item:hover:not(:has(input:disabled)) { border-color: #3f3f46; }
+.well-selector-item:has(input:checked) { border-color: #2e7d6b; background: rgba(46, 125, 107, 0.1); }
+.well-selector-item:has(input:disabled) { opacity: 0.25; cursor: not-allowed; background: #09090b; }
+.well-selector-item:has(input:disabled) input { cursor: not-allowed; }
+
+.summary-toggle-wrapper, .view-toggle-wrapper {
+    border-top: 1px solid #27272a;
+    padding-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+.summary-toggle-wrapper { align-items: center; }
+
+.summary-toggle-label, .view-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.view-toggle-wrapper { margin-top: 16px; }
+.view-toggle-label { transition: color 0.15s ease; }
+.view-toggle-label:hover { color: #fff; }
+
+.active-well-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.active-well-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.active-well-section img {
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #27272a;
+    background: #000;
+}
+
+.segmented-control {
+    display: inline-flex;
+    background: #09090b;
+    border: 1px solid #27272a;
+    border-radius: 6px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.segmented-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.segmented-btn:hover:not(.active) {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.segmented-btn.active {
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}

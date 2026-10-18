@@ -1,0 +1,19 @@
+27.08.2026 - SAF robustness / success rate
+
+100 ms, BF 80 %, 200 µm 10 µm
+
+- starting at the correct position:
+Start	SAF	    Human (correct)
+-205.8	-205.3  -205.8
+-205.3	-205.4
+-205.4	-205.6
+-205.6	-205.5
+-205.5  -205.5
+
+- starting from off positions
+Start	SAF	    Human (correct)
+-112.9	-202.8	-205.8
+-188.4	-204.1	
+-258.8	-204.6
+-174.2	-206.0
+-225.8	-205.9

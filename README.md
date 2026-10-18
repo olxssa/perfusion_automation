@@ -1,14 +1,22 @@
 # perfusion_automation
+
+<img align="right" src="Figures/bath_perfusion_icon_bathtub.png" width="100"/>
+
 *Design and implementation of an automated high-content screening cell perfusion system, including associated control software*
 
-Public project repository about an automated multi-well perfusion and imaging system. Except for the microscope frame, motorized stage and the main light source for fluorescence microscopy, the optical and electrical parts were either re-used or cheap to buy.
+Public project repository about an automated multi-well bath perfusion and imaging system.
+***
 
-## Repository content
+## Repository Content
 
-### 3D printed parts
+### FreeCAD Files
+
+### FPC Design Files
+
+### Firmware
 
 ### Software
-<img src="/images/img_design.png" width="920">
+<img src="/Figures/web_app_structure.png" width="920">
 
 After the build the setup can be either used via a custom-developed web application or script-based with a Jupyter Notebook. Furthermore, the scripts core_methods.py and cellpose_worker.py are neccessary for both to work. 
 
@@ -35,37 +43,43 @@ The software includes the following tools:
    * Background subtraction and computation of fluorescence change over time for individual cells for every well
    * Comparison of mean of fluorescence change over time for all wells
 
-## Documentation
-### Building a fluorescence microscope
-* Rapid Automated Modular Microscope System (RAMM) by ASI as a frame with motorized ASI xyz-stage and stage controller (~30 K)
-* NeoPixel ring 24 LEDs
-* Lumencore SOLA Light Engine (~8 K)
-<img src="/images/light_path.png" width="500">
+### Data
 
-### Constructing an Automated Screening Perfusion System
-#### Fluidic circuit
-<img src="/images/fluidic_circuit.png" width="500">
-Wiring of the fluidic circuit. A: Pressure distribution system. B: Reservoirs with perfusion solutions. C:
-Micro-valve circuit and channel numbering. D: Perfusion site with precise volume exchange.
 
-#### Electrical circuits
-<img src="/images/electrical_circuit_v2.png" width="500">
+***
+
+## Documentation of the Project
+### 1. Building a Modular Fluorescence Microscope
+
+<img src="/Figures/light_path_w.png" width="500">
+
+### 2. Constructing an Automated Bath Perfusion System for Screening
+#### Fluidic Circuit
+<img src="/Figures/fluidic_circuit_wh.png" width="500">
+
+<img src="/Figures/setup.png" width="500">
+
+#### Electrical Circuits
+<img src="/Figures/electrical_circuit_w.png" width="500">
 Wiring of the electrical circuit. A: RX System with Arduino Uno Rev 3 with Servos, Solenoid-Valves and Neopixel Ring. B: TX System with Xiao ESP32-S3 with Sensors and Abort button.
 
-### Developing a custom web app as a user interface using Flask
+### 3. Developing a Custom Web App as a User Interface using Flask
 #### System Architecture
-<img src="/images/web_app.png" width="500">
+<img src="/Figures/web_app_w.png" width="500">
 
 #### Hardware Interfacing
 
 #### Communication Protocols
 
-#### Core Functional Methods
-##### Perfusion Experiment
-<img src="/images/perfusion_experiment.png" width="500">
+### Calibration and Benchmarking
 
-##### Stop Button
-<img src="/images/stop_button.png" width="500">
+<img src="/Figures/Benchmarking_FlowRate_w.png" width="500">
+
+<img src="/Figures/benchmarking_SAF.png" width="500">
+
+### References
+
+*** 
 
 ### Status quo: 
 [![](https://img.youtube.com/vi/6NS1tuH9CTA/0.jpg)](https://youtu.be/6NS1tuH9CTA "Click to play on Youtube.com")

@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Automatic Bath Perfusion App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=1) }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div id="instructionModal" class="modal">
+    <div class="modal-content">
+        <h1>Instructions</h1>
+        <p>Hi there! Welcome to the Plested Lab Automatic Bath Perfusion App. Please follow the instructions carefully before proceeding.</p>
+        <h3>Extremely important!</h3>
+            <ul>
+                <li>Always hit EXIT before closing the app! (Otherwise restarting the app will not the possible as easy.)</li>
+                <li>Do not use the Live Preview longer than you need to (max. 30 s).</li>
+            </ul>
+        <h3>Structure of the App</h3>
+            <ul>
+                <li>Left: <b>Preview</b> - Tools to get a first view of your sample.</li>
+                <li>Middle: <b>Perfusion Experiment</b> - Plan and start your automatic perfusion experiment.</li>
+                <li>Right: <b>Preliminary Analysis</b> - First glimpse of analysis of your automatic perfusion experiment data.</li>
+            </ul>
+
+        <h3>Before starting your perfusion experiment...</h3>
+            <ol>
+                <li>Empty the waste bottle.</li>
+                <li>Fill your solutions into the five reservoirs (100 ml Schott Duran bottles). For that,
+                    have a look at the reservoir mount (on the left, blue) and its corresponding numbering in order to correctly assign your solution names to the reservoir numbers.</li>
+                <li>In order to remove air bubbles from the perfusion system, place a beaker beneath the green PEEK tubes and test the flow from all the reservoirs. Make sure that it displays a flow-rate! (If not, let the administrator know and close the app!)
+                    For each solution, let the liquid flow until you see a constant droplet formation, without any air bubbles.
+                    If there is no flow at all, the air bubbles are too big and the big pump needs to be attached to one reservoir only at a time + Start Test Flow button pressed in order to restore flow.</li>
+                <li>Put your multi-well plate into the stage mount.</li>
+                <li>Turn off the room light and put the black hood on the perfusion arm.</li>
+                <li>Go to <i>Preview &#8594; Live + Auto Contrast </i> and adjust the z-position using the ASI controller wheel in order to get your sample into focus.
+                    (This is crucial for the software autofocus in the experiment.)</li>
+                <li>The exposure time for the images has to be set via <i>Preview &#8594; Exposure time</i>. The finally set parameters will be used during the experiment.</li>
+                <li>Try out the software autofocus for your samples and/or play around with the parameters. The finally set parameters will be used during the experiment.</li>
+                <li>In order to correctly design your perfusion experiment, please go through all the 6 steps in <i>Perfusion Experiment</i> starting at the top.</li>
+                <li>By default, the center coordinates of a well are used as ROI for the time-lapse acquisition. In <i>Additional tools</i> you can find alternatives:
+                    <ul>
+                        <li>AutoFOV does automatic cell segmentation and uses a dynamic threshold to count fluorescent cells. It chooses a FOV featuring > 20 and < 80 fluorescent cells.</li>
+                        <li>ManuFOV lets the user choose their own preferred FOV.
+                            After starting the experiment, the preview window displays the current FOV and the preferred xy-coordinates can be set using the ASI stage controller.</li>
+                    </ul>
+                </li>
+                <li>Please always restart the app after before starting a new experiment!</li>
+
+            </ol>
+        <h3>After your perfusion experiment...</h3>
+        <ul>
+            <li>Wash out the reservoirs using 20 % Ethanol / 80 % DI water,
+                    fill them with at least 20 ml each and test the flow from all the reservoirs for 30-60 s each.
+                Also, make sure to clean the syringes and attached tubes and fill with 20 % Ethanol / 80 % DI water. </li>
+            <li>Clean the syringe pumps using <i>Perfusion Experiment &#8594; Clean Syringe Pumps</i>.</li>
+            <li>Disconnect the blue fluidic adapters from the flow-rate sensor in order for it to dry.</li>
+            <li>You can let your dataset be analysed via <i>Preliminary Analysis &#8594; Analyse Perfusion Experiment Data</i>.
+                You can also analyse another dataset when you enter the corresponding experiment name in
+                <i>Perfusion Experiment &#8594; 1. Location to Save Experiment Files</i>.</li>
+            <li>Always hit EXIT before closing the app! (Otherwise restarting the app will not the possible as easy.)</li>
+        </ul>
+        <h3>Further questions?</h3>
+        Feel free to ask me any questions, in person, via Slack or email: <a href="mailto:olyssa@mail.de">olyssa@mail.de</a>
+        <div></div>
+        Github Repository about this project: <a href="https://github.com/olxssa/perfusion_automation">perfusion_automation</a> (Contains a section about Troubleshooting)
+        <h3>Have fun! &#127774</h3>
+        <div class="button-group">
+            <button class="btn-compact" id="okBtn">Okay</button>
+            <button id="openNewTabBtn">Open these instructions in a new tab</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="dev-name">
+    <div>by Olyssa Sperling</div>
+    <div>
+        <i class="fab fa-github"></i> github.com/olxssa
+    </div>
+    <div>
+        <i class="fa-solid fa-envelope"></i> olyssa@mail.de
+    </div>
+    </div>
+
+    <div class="column">
+        <h1>Preview</h1>
+        <div class="card">
+        <div class="preview-container">
+            <img id="preview" class="preview-box" width="488" height="488" />
+
+            <div class="preview-controls">
+                <span class="field-label">Snap Preview Images</span>
+                <button class="btn-run" style="margin-bottom: 15px;" id="liveBtn" onclick="toggleLive()">Live + Auto contrast</button>
+                <button class="btn-run" style="margin-bottom: 15px;" onclick="snap()">Snap + Auto contrast</button>
+                <button class="btn-run" onclick="snap_fluo()"><span style="color: #00ff92;">Fluo Snap</span> + Auto contrast</button>
+                <div></div><div></div>
+                <div class="input-group">
+                    <span class="field-label">Exposure Time</span>
+                    <div class="input-wrapper" id="exposure-wrapper">
+                        <input type="number" id="exposure" value="100">
+                        <span class="unit">ms</span>
+                    </div>
+                </div>
+                <div class="input-group" style="margin-top: 15px;">
+                    <span class="field-label">BF Source Brightness</span>
+                    <div class="input-wrapper" style="display: flex; align-items: center; gap: 5px;">
+                        <input type="range" id="brightnessSlider" min="0" max="95" value="50" style="flex-grow: 1;">
+                        <span class="unit" id="brightnessValue" style="min-width: 50px; text-align: right;">50 %</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div id="manualFovPanel" style="display: none; margin-top: 16px; padding: 12px; border-top: 1px solid #27272a; background: #09090b; border-radius: 4px;">
+        <span class="field-label" id="manualFovMessage" style="font-size: 14px; color: #a1a1aa; display: block; margin-bottom: 12px;">
+            Well FOV Selection Active
+        </span>
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button type="button" class="btn-run" id="manualFovFluoBtn" onclick="toggleManualFluo()" style="width: auto; padding: 6px 16px; background: #18181b; border: 1px solid #27272a;">
+            <span style="color: #00ff92;">Fluorescence ON</span></button>
+            <button type="button" class="exit" id="manualFovCancelBtn" style="width: auto; padding: 6px 16px;">Cancel / Abort</button>
+            <button type="button" class="btn-run" id="manualFovOkBtn" style="width: auto; padding: 6px 16px;">Confirm FOV</button>
+        </div>
+    </div>
+        </div>
+        <div class="card" style="display: none;">
+            <h3>LED Light Source</h3>
+            <div class="preview-settings">
+            <label>Channel Group:</label>
+            <select id="channelGroup" onchange="updateChannelOptions()">
+                <option value="fluorescence">fluorescence</option>
+            </select>
+            <div></div>
+            <label>Channel:</label><select id="channel"></select>
+            <div></div>
+        </div>
+        </div>
+
+
+        <div class="card">
+            <h3>Manual Stage Movement</h3>
+            <div class="controls">
+            <div>
+                <div class="control-block">
+                    <div class="input-group step">
+                        <span class="field-label">Step size · XY</span>
+                        <div class="input-wrapper">
+                            <input id="xy_step" type="number" value="10">
+                            <span class="unit">µm</span>
+                        </div>
+                    </div>
+
+                    <div class="xy-buttons">
+                        <div></div>
+                        <button class="btn-run" onclick="moveXY(0,1)">↑</button>
+                        <div></div>
+                        <button class="btn-run" onclick="moveXY(-1,0)">←</button>
+                        <div></div>
+                        <button class="btn-run" onclick="moveXY(1,0)">→</button>
+                        <div></div>
+                        <button class="btn-run" onclick="moveXY(0,-1)">↓</button>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="control-block">
+                    <div class="input-group step">
+                        <span class="field-label">Step size · Z</span>
+                        <div class="input-wrapper">
+                            <input id="z_step" type="number" value="10">
+                            <span class="unit">µm</span>
+                        </div>
+                    </div>
+
+                    <div class="z-buttons">
+                        <button class="btn-run" onclick="moveZ(1)">↑</button>
+                        <button class="btn-run" onclick="moveZ(-1)">↓</button>
+                    </div>
+                </div>
+
+            </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Test Software Autofocus</h3>
+
+            <div class="control-block">
+                <div class="settings-inline-row layout-compact">
+
+                    <div class="input-group no-flex">
+                        <span class="field-label">Range</span>
+                        <div class="input-wrapper af-input-width">
+                            <input id="af-range" type="number" value="200">
+                            <span class="unit">µm</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group no-flex">
+                        <span class="field-label">Step size · Z</span>
+                        <div class="input-wrapper af-input-width">
+                            <input id="af-step" type="number" value="10">
+                            <span class="unit">µm</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group no-flex">
+                        <span class="field-label">&nbsp;</span>
+                        <button class="btn-run btn-compact" onclick="run_autofocus()">Run</button>
+                    </div>
+
+                    <div class="input-group no-flex" style="margin-left: 200px;">
+                        <span class="field-label">Absolute Z Position</span>
+                        <div class="input-wrapper af-input-width">
+                            <input id="current_z" type="text" readonly tabindex="-1">
+                            <span class="unit">µm</span>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Test flow from reservoirs (place e.g. beaker under tubes)</h3>
+
+            <div class="preview-settings">
+                <div class="input-group">
+                  <span class="field-label">Reservoir 1</span>
+                  <button class="btn-run start-state" data-id="1" data-active="false" onclick="toggleButton(this)">Start</button>
+                </div>
+
+                <div class="input-group" style="margin-left: 20px;">
+                  <span class="field-label">Reservoir 2</span>
+                  <button class="btn-run start-state" data-id="2" data-active="false" onclick="toggleButton(this)">Start</button>
+                </div>
+
+                <div class="input-group" style="margin-left: 20px;">
+                  <span class="field-label">Reservoir 3</span>
+                  <button class="btn-run start-state" data-id="3" data-active="false" onclick="toggleButton(this)">Start</button>
+                </div>
+
+                <div class="input-group" style="margin-left: 20px;">
+                  <span class="field-label">Reservoir 4</span>
+                  <button class="btn-run start-state" data-id="4" data-active="false" onclick="toggleButton(this)">Start</button>
+                </div>
+
+                <div class="input-group" style="margin-left: 20px;">
+                  <span class="field-label">Reservoir 5</span>
+                  <button class="btn-run start-state" data-id="5" data-active="false" onclick="toggleButton(this)">Start</button>
+                </div>
+
+                <div class="input-group no-flex push-right" style="margin-left: 34px;">
+                    <span class="field-label">Flow-Rate</span>
+                    <div class="input-wrapper af-input-width">
+                        <input id="current_flow_rate" type="text" readonly tabindex="-1">
+                        <span class="unit">µl/min</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <button class="btn exit" onclick="exitApp()">EXIT</button>
+
+    </div>
+
+
+    <div class="column">
+        <h1>Perfusion Experiment</h1>
+        <div class="card">
+
+            <h3>1. Location to Save Experiment Files</h3>
+            D:\Automated_Bath_Perfusion_Experiments\
+            <input id="exp_name" placeholder="Experiment Name" />
+        </div>
+
+        <div class="card">
+            <h3>2. Multi-Well</h3>
+            <div class="control-block">
+                <div class="settings-inline-row layout-compact">
+
+                    <div class="input-group">
+                        <span class="field-label">Plate-type (wells)</span>
+                        <select id="plate_type">
+                            <option>6</option>
+                            <option>12</option>
+                            <option>24</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="field-label">Starting Well</span>
+                        <select id="starting_well">
+                            <option>A1</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="field-label">Well Order</span>
+                        <select id="order_type">
+                            <option>snake</option>
+                            <option>row-major</option>
+                            <option>column-major</option>
+                            <option>random</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>3. Imaging</h3>
+            <div class="control-block">
+                <div class="settings-inline-row layout-compact">
+                    <div class="input-group no-flex">
+                        <span class="field-label">Observation Time after perfusion</span>
+                        <div class="input-wrapper timing-input-width">
+                            <input id="observation_time" type="number" value="3">
+                            <span class="unit">s</span>
+                        </div>
+                    </div>
+                    <div class="input-group no-flex">
+                        <span class="field-label">Time Interval between Imaging</span>
+                        <div class="input-wrapper freq-input-width">
+                            <input id="time_interval_ms" type="number" value="1000">
+                            <span class="unit">ms</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>4. Solutions</h3>
+            <div id="solutions">
+                <div class="header">Reservoir Number</div><div class="header">Name</div><div></div>
+
+                <div>1</div><div class="solution-name">wash (DI water)</div><div></div>
+                <div>2</div><input class="solution-input" placeholder="control"><div></div>
+                <div>3</div><input class="solution-input" placeholder="glutamate_10uM"><div></div>
+                <div>4</div><input class="solution-input" placeholder="glutamate_100uM"><div></div>
+                <div>5</div><input class="solution-input" placeholder="thapsigargin"><div></div>
+</div>
+        </div>
+
+        <div class="card">
+            <h3>5. Solution Sequence</h3>
+
+            <div class="control-block space-bottom">
+                <div class="settings-inline-row layout-compact">
+
+                    <div class="input-group no-flex">
+                        <span class="field-label">Range</span>
+                        <div class="input-wrapper af-input-width">
+                            <input id="sequenceLength" type="number" value="3" min="1">
+                        </div>
+                    </div>
+
+                    <div class="input-group no-flex">
+                        <span class="field-label">&nbsp;</span>
+                        <button class="btn-run btn-compact" onclick="renderSequence()">Apply</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="sequence-header" class="sequence-row">
+                <div class="field-label">Order</div>
+                <div class="field-label">Solution</div>
+                <div class="field-label">Volume</div>
+                <div></div>
+            </div>
+
+            <div id="sequence"></div>
+
+        </div>
+
+        <div class="card">
+            <h3>6. Additional tools</h3>
+
+            <div>
+                <input type="radio" id="center_FOV" name="fov_tool" value="center_FOV" checked>
+                <label for="center_FOV">CenterFOV: Nothing fancy, just the well center coordinates and SAF (Default)</label>
+            </div>
+
+            <div>
+                <input type="radio" id="auto_FOV" name="fov_tool" value="auto_FOV">
+                <label for="auto_FOV">AutoFOV: Automatically determine best FOV and focus-position for every well</label>
+            </div>
+
+            <div>
+                <input type="radio" id="manu_FOV" name="fov_tool" value="manu_FOV">
+                <label for="manu_FOV">ManuFOV: Manually determine best FOV and focus-position for every well</label>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button onclick="run_perfusion_experiment()" id="start_perfusion">Start Perfusion Experiment</button>
+
+            <button onclick="run_clean_syringe_pumps()" id="clean_syringe_pumps">Clean syringe pumps</button>
+        </div>
+
+        </div>
+
+    <div class="column">
+        <h1>Preliminary Analysis</h1>
+
+        <button class="btn-run" style="margin-bottom: 16px;" onclick="runAnalysis()">Analyse Perfusion Experiment Data</button>
+        <div id="save-path-banner" class="save-path-banner" style="display: none; margin-bottom: 16px;"></div>
+
+        <!-- Active Single Well Viewer Card -->
+        <div class="card" id="analysis-results-card" style="display: none;">
+            <h3 id="analysis-title">Mean Fluorescence Intensity (Well Mode)</h3>
+
+            <!-- Active Viewport -->
+            <div id="active-well-viewer">
+                <!-- Kinetic Trajectory Figure (Default View) -->
+                <div id="view-kinetic-trajectory">
+                    <img id="img-kinetic-trajectory" src="" alt="Kinetic Trajectory Plot" style="width: 100%; height: auto;">
+                </div>
+
+                <!-- Segmentation Overlay Figure (Hidden by Default) -->
+                <div id="view-segmentation-overlay" style="display: none;">
+                    <img id="img-segmentation-overlay" src="" alt="Segmentation Overlay Plot" style="width: 100%; height: auto;">
+                </div>
+            </div>
+
+            <!-- Figure View Segmented Toggle -->
+            <div class="view-toggle-wrapper">
+                <div class="segmented-control" id="view-mode-toggle">
+                    <button type="button"
+                            class="segmented-btn active"
+                            data-view="kinetic"
+                            onclick="switchWellView('kinetic')">
+                        Fluorescence Trajectory
+                    </button>
+                    <button type="button"
+                            class="segmented-btn"
+                            data-view="segmentation"
+                            onclick="switchWellView('segmentation')">
+                        Segmentation Overlay
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Grid Filter Card -->
+        <div class="card" id="selector-card" style="display: none;">
+            <h3>Select Well / Figure view</h3>
+
+            <!-- Checklist Matrix -->
+            <div id="well-selector-grid" class="well-selector-grid">
+                <!-- Population grid matching 6 or 24 well layouts -->
+            </div>
+
+            <!-- Combined Analysis Plot -->
+            <div class="summary-toggle-wrapper">
+                <label class="summary-toggle-label">
+                    <input type="checkbox" id="chk-all-means" value="all-means" onchange="handleSelectorChange(this)">
+                    <span>Show All Means (Plate Summary Figure)</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+
+<div id="loadingOverlay" >
+    <div class="spinner"></div>
+    <div id="loadingText">Processing...</div>
+    <div id="countdownTimer"></div>
+    <button id="abortBtn" onclick="abortExperiment()">Abort</button>
+</div>
+
+<script>
+
+// Close modal when user clicks "Okay"
+document.getElementById('okBtn').addEventListener('click', function() {
+document.getElementById('instructionModal').style.display = 'none';
+});
+
+document.getElementById('openNewTabBtn').addEventListener('click', function() {
+    // Clone the inner HTML of the modal content
+    const modalContent = document.querySelector('#instructionModal .modal-content').cloneNode(true);
+
+    // Remove the action buttons from the printed/new tab view
+    const okBtn = modalContent.querySelector('#okBtn');
+    const newTabBtn = modalContent.querySelector('#openNewTabBtn');
+    if (okBtn) okBtn.remove();
+    if (newTabBtn) newTabBtn.remove();
+
+    // Open a new blank window/tab
+    const newWindow = window.open('', '_blank');
+
+    if (newWindow) {
+        newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>App Instructions</title>
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                        line-height: 1.6;
+                        padding: 30px;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        background-color: #121212; /* Black background */
+                        color: #e0e0e0;            /* Bright grey main text */
+                    }
+                    h1 {
+                        color: #ffffff;            /* Pure white headings */
+                        border-bottom: 2px solid #333333;
+                        padding-bottom: 10px;
+                    }
+                    h3 {
+                        color: #4180bf;            /* Light accent color for subheadings */
+                        margin-top: 25px;
+                    }
+                    ul, ol { padding-left: 25px; }
+                    li { margin-bottom: 8px; }
+                    b, strong { color: #ffffff; }  /* Pure white for bold text */
+                    a { color: #82b1ff; }          /* Bright blue for links on dark background */
+                </style>
+            </head>
+            <body>
+                ${modalContent.innerHTML}
+            </body>
+            </html>
+        `);
+        newWindow.document.close();
+    }
+});
+
+const channels = {
+    "fluorescence": ["off", "on_50P", "on_70P"]
+};
+
+function showLoading(text = "Processing...", options = {}) {
+    const overlay = document.getElementById("loadingOverlay");
+    const label = document.getElementById("loadingText");
+    const timer = document.getElementById("countdownTimer");
+    const abortBtn = document.getElementById("abortBtn");
+
+    label.innerText = text;
+    overlay.style.display = "flex";
+
+    // Countdown visibility
+    if (options.showCountdown) {
+        timer.style.display = "block";
+    } else {
+        timer.style.display = "none";
+        timer.innerText = "";
+    }
+
+    // Abort button visibility
+    if (options.showAbort) {
+        abortBtn.style.display = "block";
+    } else {
+        abortBtn.style.display = "none";
+    }
+}
+
+function hideLoading() {
+    document.getElementById("loadingOverlay").style.display = "none";
+
+    // Reset countdown
+    clearInterval(countdownInterval);
+    document.getElementById("countdownTimer").innerText = "";
+}
+
+// Initialize channel dropdown
+// When the group changes, update the channel options AND apply settings
+function updateChannelOptions() {
+    const group = document.getElementById("channelGroup").value;
+    const channelSelect = document.getElementById("channel");
+
+    channelSelect.innerHTML = "";
+
+    channels[group].forEach(ch => {
+        const opt = document.createElement("option");
+        opt.value = ch;
+        opt.text = ch;
+
+        if (ch === "off") {
+            opt.selected = true;
+        }
+
+        channelSelect.add(opt);
+    });
+
+    // Immediately apply the default channel for this group
+    applySettings();
+}
+
+// Also listen to the channel dropdown
+document.getElementById("channel").addEventListener("change", () => {
+    applySettings();
+});
+
+// Apply exposure when changed
+document.getElementById("exposure").addEventListener("change", () => {
+    applySettings();
+});
+updateChannelOptions();
+
+// Apply current settings to Core
+function applySettings() {
+    const exposureRaw = document.getElementById("exposure").value;
+    const exposure = exposureRaw === "" ? null : parseFloat(exposureRaw);
+
+    fetch("/set_channel", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            group: document.getElementById("channelGroup").value,
+            channel: document.getElementById("channel").value,
+            exposure: exposure
+        })
+    });
+}
+
+// Toggle live
+let liveOn = false;
+let liveInterval = null;
+let liveAbortController = null;
+
+async function toggleLive() {
+    const preview = document.getElementById("preview");
+    const btn = document.getElementById("liveBtn");
+
+    if (!liveOn) {
+        liveOn = true;
+        btn.innerText = "Stop Live";
+
+        // Dark active state styles
+        btn.style.color = "#ffffff";
+        btn.style.background = "#18181b";
+        btn.style.borderColor = "#27272a";
+
+        // 1. Notify server live mode ON (triggers "C 255 255 255")
+        await fetch("/set_live_mode", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ live: true, state:false  })
+        });
+
+        liveAbortController = new AbortController();
+
+        // 2. Start frame acquisition loop (ensure no serial commands are inside /snap_live)
+        liveInterval = setInterval(async () => {
+            if (!liveOn) return;
+            try {
+                const resp = await fetch("/snap_live", { signal: liveAbortController.signal });
+                const blob = await resp.blob();
+
+                if (!liveOn) return;
+
+                if (preview.src) URL.revokeObjectURL(preview.src);
+                preview.src = URL.createObjectURL(blob);
+
+            } catch (err) {
+                if (err.name === "AbortError") {
+                    console.log("Live preview aborted");
+                } else {
+                    console.error("Live preview error:", err);
+                }
+            }
+        }, 200);
+
+    } else {
+        // Stop live mode UI state immediately
+        liveOn = false;
+        btn.innerText = "Live + Auto contrast";
+
+        btn.style.color = "";
+        btn.style.background = "";
+        btn.style.borderColor = "";
+
+        clearInterval(liveInterval);
+        liveInterval = null;
+
+        if (liveAbortController) {
+            liveAbortController.abort();
+            liveAbortController = null;
+        }
+
+        // Notify server live mode OFF (triggers "C 0 0 0")
+        await fetch("/set_live_mode", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ live: false, state:false  })
+        });
+    }
+}
+
+// Snap single image
+async function snap() {
+    try {
+        if (liveOn) await toggleLive();
+        showLoading("Snapping image and applying auto contrast...");
+
+        // Fetch single combined snap + contrast endpoint
+        const snapResp = await fetch("/snap");
+        const snapBlob = await snapResp.blob();
+
+        const preview = document.getElementById("preview");
+        if (preview.src) URL.revokeObjectURL(preview.src);
+        preview.src = URL.createObjectURL(snapBlob);
+
+    } catch (err) {
+        console.error("Snap failed:", err);
+    } finally {
+        hideLoading();
+    }
+}
+
+// Fluorescence snap
+async function snap_fluo() {
+    try {
+        applySettings();
+
+        // Stop live mode if it's on
+        if (liveOn) await toggleLive();
+
+        showLoading("Snapping fluorescence image and applying auto contrast...");
+
+        // Fetch the snapped image and wait for it to finish
+        const snapResp = await fetch("/snap_fluo");
+        const snapBlob = await snapResp.blob();
+
+        const preview = document.getElementById("preview");
+        if (preview.src) URL.revokeObjectURL(preview.src); // free old memory
+        preview.src = URL.createObjectURL(snapBlob);
+
+    } catch (err) {
+        console.error("Snap fluo failed:", err);
+    } finally {
+        hideLoading();
+    }
+}
+
+const slider = document.getElementById('brightnessSlider');
+const display = document.getElementById('brightnessValue');
+
+slider.addEventListener('input', (event) => {
+    const percentVal = parseInt(event.target.value);
+
+    // UI displays the clean percentage
+    display.textContent = percentVal + '%';
+
+    // Convert 0-100% to 0-255 scale for the backend serial write
+    const serialVal = Math.round((percentVal * 255) / 100);
+
+    fetch('/set_brightness', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ brightness: serialVal }),
+    })
+    .catch(error => console.error('Serial error:', error));
+});
+
+// XY / Z movement
+function moveXY(dx, dy) {
+    // read step size from input and ensure it's non-negative
+    const step = Math.max(0, parseFloat(document.getElementById("xy_step").value) || 0);
+
+    // scale the direction by the step size
+    const x = dx * step;
+    const y = dy * step;
+
+    // send movement to server
+    fetch("/move_xy", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ x: x, y: y })
+    });
+}
+function moveZ(dz) {
+    // read step size from input and ensure non-negative
+    const step = Math.max(0, parseFloat(document.getElementById("z_step").value) || 0);
+
+    // scale direction by step size
+    const z = dz * step;
+
+    // send movement to server
+    fetch("/move_z", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ z: z })
+    });
+}
+
+function lockOption(radio) {
+    if (radio.checked) {
+        // Disable all inputs in the same radio group to lock the choice
+        document.querySelectorAll('input[name="' + radio.name + '"]').forEach(input => {
+            input.disabled = true;
+        });
+    }
+}
+
+// Run autofocus
+async function run_autofocus() {
+    console.log("Autofocus button clicked");
+    try {
+        applySettings();
+
+        if (liveOn) await toggleLive();
+
+        // Get values from inputs
+        const range = parseFloat(document.getElementById("af-range").value);
+        const step = parseFloat(document.getElementById("af-step").value);
+
+        showLoading(`Performing large-range autofocus first...`);
+
+        // Send to backend
+        const resp_large = await fetch("/run_large_range_autofocus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        showLoading(`Performing fine-tuned autofocus (range=${range}, step-size=${step})...`);
+
+        // Send to backend
+        const resp = await fetch("/run_autofocus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ range, step })
+        });
+
+        const result = await resp.json();
+        if (typeof result.saf_outcome === 'string') {
+            alert("Warning: " + result.saf_outcome);
+            return; // Stop execution here so it doesn't try to snap
+        }
+
+        if (!resp.ok) {
+            throw new Error("Autofocus failed");
+        }
+
+        // Snap after autofocus
+        showLoading("Snapping image after autofocus...");
+
+        applySettings();
+
+        // Stop live mode if it's on
+        if (liveOn) await toggleLive();
+
+        // Fetch single combined snap endpoint (same as snap() function)
+        const snapResp = await fetch("/snap");
+        if (!snapResp.ok) {
+            throw new Error("Snap failed");
+        }
+
+        const snapBlob = await snapResp.blob();
+
+        const preview = document.getElementById("preview");
+        if (preview.src) URL.revokeObjectURL(preview.src); // free old memory
+        preview.src = URL.createObjectURL(snapBlob);
+
+    } catch (err) {
+        console.error("Autofocus failed:", err);
+        alert("A technical error occurred during autofocus.");
+    } finally {
+        hideLoading();
+    }
+}
+
+// Run test flow
+function toggleButton(btn) {
+    const reservoir_no = btn.getAttribute('data-id');
+    const isActive = btn.getAttribute('data-active') === 'true';
+
+    if (!isActive) {
+        // Send the reservoir_no inside the JSON body instead of the URL
+        fetch('/test_flow_start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reservoir_no: reservoir_no })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            btn.innerText = 'Stop';
+            btn.setAttribute('data-active', 'true');
+            btn.classList.remove('start-state');
+            btn.classList.add('stop-state');
+        })
+        .catch(err => console.error('Error starting:', err));
+
+    } else {
+        fetch('/test_flow_stop', { method: 'POST' })
+        .then(response => {
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            btn.innerText = 'Start';
+            btn.setAttribute('data-active', 'false');
+            btn.classList.remove('stop-state');
+            btn.classList.add('start-state');
+        })
+        .catch(err => console.error('Error stopping:', err));
+    }
+}
+
+// To get options for solution sequence
+function getSolutions() {
+    let solutions = [];
+
+    // Inputs
+    document.querySelectorAll('.solution-input').forEach((input, index) => {
+        let name = input.value.trim() || input.placeholder;
+        let reservoir = index + 2; // reservoirs 2–5
+
+        if (name) {
+            solutions.push({
+                name: name,
+                reservoir: reservoir
+            });
+        }
+    });
+
+    return solutions;
+}
+
+let defaults = [0, 1, 0, 2, 0, 3, 0];
+populateDropdowns(defaults);
+
+function renderSequence() {
+    const container = document.getElementById("sequence");
+    const length = parseInt(document.getElementById("sequenceLength").value);
+
+    container.innerHTML = "";
+
+    for (let i = 0; i < length; i++) {
+        const row = document.createElement("div");
+        row.classList.add("sequence-row");
+
+        row.innerHTML = `
+            <div>${i + 1}.</div>
+            <select name="sequence"></select>
+            <div class="input-wrapper">
+                <input type="text"
+                    name="volume"
+                    value="0.5"
+                    max="6.0"
+                    min="0.0"
+                    pattern="[0-9]*([\\.,][0-9]*)?"
+                    inputmode="decimal">
+                <span class="unit">ml</span>
+            </div>
+        `;
+
+        const volumeInput = row.querySelector('input[name="volume"]');
+        volumeInput.addEventListener('input', (e) => {
+            const parsed = parseFloat(e.target.value.replace(',', '.'));
+            if (!isNaN(parsed) && parsed > 6.0) {
+                e.target.value = "6.0";
+            }
+            if (!isNaN(parsed) && parsed < 0.0) {
+                e.target.value = "0.0";
+            }
+        });
+
+        container.appendChild(row);
+    }
+
+    populateDropdowns(defaults);
+}
+
+function populateDropdowns(defaultIndices = []) {
+    let solutions = getSolutions();
+    let selects = document.querySelectorAll('#sequence select');
+
+    selects.forEach((select, i) => {
+        let currentValue = select.value;
+
+        select.innerHTML = "";
+
+        solutions.forEach((sol, idx) => {
+            let option = document.createElement("option");
+            option.value = sol.reservoir;
+            option.textContent = sol.name;
+
+            if (defaultIndices[i] !== undefined && idx === defaultIndices[i]) {
+                option.selected = true;
+            }
+
+            if (currentValue && currentValue == sol.reservoir) {
+                option.selected = true;
+            }
+
+            select.appendChild(option);
+        });
+    });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    renderSequence(); // default = 7 from input
+});
+
+function getSolutionNamesWithWash() {
+    let names = ["wash"]; // reservoir 1
+
+    document.querySelectorAll('.solution-input').forEach(input => {
+        let name = input.value.trim() || input.placeholder;
+        if (name) names.push(name);
+    });
+
+    return names;
+}
+
+// Run once on page load
+window.onload = populateDropdowns;
+
+// Update whenever user types
+document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('solution-input')) {
+        populateDropdowns();
+    }
+});
+
+let isFluoOn = false;
+
+async function toggleManualFluo() {
+    const fluoBtn = document.getElementById("manualFovFluoBtn");
+    const newState = !isFluoOn;
+
+    fluoBtn.disabled = true;
+
+    try {
+        const resp = await fetch("/toggle_fluorescence", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ state: newState })
+        });
+
+        if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+
+        isFluoOn = newState;
+
+        // Corrected UI state updates
+        if (isFluoOn) {
+            fluoBtn.innerText = "Fluorescence OFF";
+            fluoBtn.style.color = "#ffffff";
+            fluoBtn.style.background = "#18181b";
+            fluoBtn.style.borderColor = "#27272a";
+        } else {
+            fluoBtn.innerText = "Fluorescence ON";
+            fluoBtn.style.color = "#00ff92";
+            fluoBtn.style.background = "#2e7d6b"; // Active state green accent
+            fluoBtn.style.borderColor = "#2e7d6b";
+        }
+    } catch (err) {
+        console.error("Failed to toggle fluorescence:", err);
+        alert("Could not change fluorescence config.");
+    } finally {
+        fluoBtn.disabled = false;
+    }
+}
+
+// Helper to show inline prompt below preview without blocking JS execution
+function promptManualFovSelection(message) {
+    return new Promise((resolve) => {
+        const panel = document.getElementById("manualFovPanel");
+        const msgEl = document.getElementById("manualFovMessage");
+        const okBtn = document.getElementById("manualFovOkBtn");
+        const cancelBtn = document.getElementById("manualFovCancelBtn");
+        const fluoBtn = document.getElementById("manualFovFluoBtn");
+
+        isFluoOn = false;
+        if (fluoBtn) {
+            fluoBtn.innerText = "Fluorescence ON";
+            fluoBtn.style.color = "#00ff92";
+            fluoBtn.style.background = "#2e7d6b"; // Active state green accent
+            fluoBtn.style.borderColor = "#2e7d6b";
+            fluoBtn.disabled = false;
+        }
+
+        msgEl.innerText = message;
+        panel.style.display = "block";
+
+        async function cleanup(result) {
+            if (isFluoOn) {
+                await toggleManualFluo();
+            }
+            panel.style.display = "none";
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+            resolve(result);
+        }
+
+        okBtn.onclick = () => cleanup(true);
+        cancelBtn.onclick = () => cleanup(false);
+    });
+}
+
+// Run Perfusion Experiment
+async function run_perfusion_experiment() {
+    console.log("Start Perfusion Experiment button clicked");
+    isAborted = false;
+
+    ////////////////////////
+    //// INITIALISATION ////
+    ////////////////////////
+
+    const expInput = document.getElementById("exp_name");
+    const exp_name = expInput.value.trim();
+
+    // 1. Check if folder exists
+    const checkResp = await fetch("/check_experiment_name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exp_name })
+    });
+    const checkData = await checkResp.json();
+    const path_to_exp_name = checkData.path_to_exp_name;
+
+    if (checkData.exists) {
+        alert("Experiment folder already exists. Please choose a different name.");
+        expInput.value = "";
+        expInput.placeholder = "Experiment Name";
+        return; // STOP execution
+    }
+
+    if (isAborted) { await executeAbortCleanup(); return; }
+
+    ///////////////////////////////////////////////
+    //// SENSOR MONITORING / EMPTYING PROCEDURE ////
+    ///////////////////////////////////////////////
+
+    let isHandlingSensorAlert = false;
+
+    // Helper function to check status and handle targeted emptying on demand
+    async function checkSensorsAndHandleEmptying() {
+        if (isHandlingSensorAlert || isAborted) return;
+
+        try {
+            const sensorResp = await fetch("/check_sensor_status");
+            const sensorData = await sensorResp.json();
+
+            if (sensorData.status === "success" && sensorData.alerts && sensorData.alerts.length > 0) {
+                isHandlingSensorAlert = true;
+
+                for (const alertInfo of sensorData.alerts) {
+                    const targetWaste = alertInfo.waste_id;
+
+                    showLoading(`Executing emptying procedure for Waste ${targetWaste}...`, {
+                        showCountdown: false,
+                        showAbort: true
+                    });
+
+                    // Execute targeted emptying on server
+                    console.log(`Executing /emptying procedure for Waste ${targetWaste}...`);
+                    await fetch("/emptying", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ waste_id: targetWaste })
+                    });
+                }
+
+                isHandlingSensorAlert = false;
+            }
+        } catch (err) {
+            console.error("Sensor check failed:", err);
+            isHandlingSensorAlert = false;
+        }
+    }
+
+    // Helper function to write log messages using log_event backend route
+    async function logExperimentEvent(eventKey, message) {
+        try {
+            await fetch("/log_experiment_event", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    exp_name: exp_name,
+                    path_to_exp_name: path_to_exp_name,
+                    event_key: eventKey,
+                    message: message
+                })
+            });
+        } catch (err) {
+            console.error("Failed to write to experiment log:", err);
+        }
+    }
+
+    // 1st Emptying Check: Post Initialisation
+    await checkSensorsAndHandleEmptying();
+    if (isAborted) { await executeAbortCleanup(); return; }
+
+    try {
+        applySettings();
+
+        // Get values from inputs
+        const range = parseFloat(document.getElementById("af-range").value);
+        const step = parseFloat(document.getElementById("af-step").value);
+        const exp_name = document.getElementById("exp_name").value;
+        const observation_time = document.getElementById("observation_time").value;
+        const plate_type = parseInt(document.getElementById("plate_type").value, 10);
+        const order_type = document.getElementById("order_type").value;
+        const time_interval_ms = document.getElementById("time_interval_ms").value;
+        const exposure_ms = document.getElementById("exposure").value;
+
+        // FOV checkboxes
+        const auto_FOV = document.getElementById("auto_FOV").checked;
+        const manu_FOV = document.getElementById("manu_FOV").checked;
+
+        // Get sequence (reservoir numbers)
+        const sequence = Array.from(document.querySelectorAll('#sequence select'))
+            .map(s => s.value)
+            .filter(v => v !== "")
+            .map(v => parseInt(v));
+
+        // Get solution names
+        const solution_names = getSolutionNamesWithWash();
+
+        // Get volumes
+        const volumes = Array.from(document.querySelectorAll('#sequence input[name="volume"]'))
+            .map(input => parseFloat(input.value) || 0);
+
+        if (isAborted) { await executeAbortCleanup(); return; }
+        await checkSensorsAndHandleEmptying();
+
+        //////////////////////////////////////////////////////////////////
+        //// 3. Determine best FOVs & generate well-center coordinates ////
+        //////////////////////////////////////////////////////////////////
+
+        let wellCenterCoordinates = [];
+        let autofocusCoordinates = [];
+        let validWells = []; // Tracks original well numbers that did not fail
+
+        if (manu_FOV) {
+            console.log(`Starting manual FOV determination for a ${plate_type}-well plate.`);
+
+            for (let current_well = 1; current_well <= plate_type; current_well++) {
+                if (isAborted) { await executeAbortCleanup(); return; }
+                await checkSensorsAndHandleEmptying();
+
+                showLoading(`Moving to well center for well ${current_well} of ${plate_type}...`, {
+                    showCountdown: false,
+                    showAbort: true
+                });
+
+                try {
+                    await fetch("/move_to_initial_well_center", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ plate_type, current_well, order_type })
+                    });
+
+                    if (isAborted) { await executeAbortCleanup(); return; }
+                    await checkSensorsAndHandleEmptying();
+
+                    hideLoading();
+
+                    await fetch("/set_live_mode", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ live: true, state: isFluoOn })
+                    });
+
+                    let manualLiveOn = true;
+                    const manualAbortController = new AbortController();
+                    const previewEl = document.getElementById("preview");
+
+                    const manualLiveInterval = setInterval(async () => {
+                        if (!manualLiveOn) return;
+                        try {
+                            const resp = await fetch("/snap_live", { signal: manualAbortController.signal });
+                            if (!resp.ok || resp.status === 204) return;
+
+                            const blob = await resp.blob();
+                            if (!manualLiveOn) return;
+
+                            if (previewEl.src) URL.revokeObjectURL(previewEl.src);
+                            previewEl.src = URL.createObjectURL(blob);
+                        } catch (err) {
+                            if (err.name !== "AbortError") {
+                                console.warn("Manual live frame skipped:", err);
+                            }
+                        }
+                    }, 200);
+
+                    const confirmed = await promptManualFovSelection(
+                        `WELL ${current_well} OF ${plate_type}: Browse stage and adjust focus. Click CONFIRM FOV when ready.`
+                    );
+
+                    manualLiveOn = false;
+                    clearInterval(manualLiveInterval);
+                    manualAbortController.abort();
+
+                    await fetch("/set_live_mode", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ live: false, state:false })
+                    });
+
+                    if (!confirmed || isAborted) {
+                        await executeAbortCleanup();
+                        return;
+                    }
+
+                    const coordsResp = await fetch("/save_manual_fov_coords", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ current_well })
+                    });
+
+                    if (!coordsResp.ok) {
+                        throw new Error(`Server error reading coordinates on well ${current_well}`);
+                    }
+
+                    const coordsData = await coordsResp.json();
+                    wellCenterCoordinates.push([coordsData.current_coord_x, coordsData.current_coord_y]);
+                    autofocusCoordinates.push(coordsData.saf_value || 0);
+                    validWells.push(current_well);
+
+                } catch (err) {
+                    console.error(`Failed manual FOV for well ${current_well}:`, err);
+                    alert(`Error mapping well ${current_well}. Terminating experiment.`);
+                    return;
+                } finally {
+                    showLoading("Processing...", { showCountdown: false, showAbort: true });
+                }
+            }
+
+        } else if (auto_FOV) {
+            console.log(`Starting automatic FOV determination for a ${plate_type}-well plate.`);
+
+            for (let current_well = 1; current_well <= plate_type; current_well++) {
+                if (isAborted) { await executeAbortCleanup(); return; }
+                await checkSensorsAndHandleEmptying();
+
+                showLoading(`Determining center coordinates for well ${current_well} of ${plate_type}...`, {
+                    showCountdown: false,
+                    showAbort: true
+                });
+
+                try {
+                    const coordsResp = await fetch("/run_determine_best_well_center_coords", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            plate_type: plate_type,
+                            order_type: order_type,
+                            current_well: current_well,
+                            auto_FOV: auto_FOV,
+                            range: range,
+                            step: step,
+                            exp_name: exp_name
+                        })
+                    });
+
+                    if (!coordsResp.ok) {
+                        throw new Error(`Server error on well ${current_well}: ${coordsResp.status}`);
+                    }
+
+                    const coordsData = await coordsResp.json();
+
+                    // SKIP CONDITION: If auto_FOV fails to find SAF or optimal FOV
+                    if (!coordsData.success || coordsData.saf_value === null || coordsData.saf_value === undefined) {
+                        const skipMsg = `Well ${current_well} skipped - No valid SAF or best FOV found`;
+                        console.warn(skipMsg);
+                        await logExperimentEvent("Skipped Well: ", skipMsg);
+                        continue; // Skip well and proceed
+                    }
+
+                    wellCenterCoordinates.push([coordsData.current_coord_x, coordsData.current_coord_y]);
+                    autofocusCoordinates.push(coordsData.saf_value);
+                    validWells.push(current_well);
+
+                } catch (err) {
+                    console.error(`Failed to get coordinates for well ${current_well}:`, err);
+                    await logExperimentEvent("Error Well Mapping: ", `Well ${current_well} failed: ${err.message}`);
+                }
+            }
+
+        } else {
+            // --- VERSION C: Neither manu_FOV nor auto_FOV (Well Centers + SAF) ---
+            console.log(`Starting default well center determination with SAF for a ${plate_type}-well plate.`);
+
+            showLoading(`Calculating default well centers and running SAF...`, {
+                showCountdown: false,
+                showAbort: true
+            });
+
+            try {
+                const resp = await fetch("/determine_well_centers", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        plate_type: plate_type,
+                        order_type: order_type,
+                        exp_name: exp_name,
+                        range: range,
+                        step: step
+                    })
+                });
+
+                if (!resp.ok) {
+                    throw new Error(`Server error calculating well centers: ${resp.status}`);
+                }
+
+                const data = await resp.json();
+
+                if (!data.success || !data.well_center_coordinates || data.well_center_coordinates.length === 0) {
+                    throw new Error("No valid wells could be autofocused.");
+                }
+
+                wellCenterCoordinates = data.well_center_coordinates;
+                autofocusCoordinates = data.autofocus_coordinates;
+                validWells = data.valid_wells;
+
+                // Log any wells that were skipped during backend execution
+                const totalWellsAttempted = plate_type;
+                if (validWells.length < totalWellsAttempted) {
+                    for (let w = 1; w <= totalWellsAttempted; w++) {
+                        if (!validWells.includes(w)) {
+                            const skipMsg = `Well ${w} skipped in Version C - SAF failed or error occurred`;
+                            console.warn(skipMsg);
+                            await logExperimentEvent("Skipped Well: ", skipMsg);
+                        }
+                    }
+                }
+
+            } catch (err) {
+                console.error("Failed Version C well center and SAF determination:", err);
+                await logExperimentEvent("Error Well Mapping: ", `Version C execution failed: ${err.message}`);
+                alert("Error executing default well center SAF determination. Terminating experiment.");
+                return;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        if (wellCenterCoordinates.length === 0) {
+            alert("No valid FOVs or SAF values found for any well. Aborting experiment.");
+            await logExperimentEvent("Aborted: ", "No valid wells found across plate.");
+            return;
+        }
+
+        console.log("Mapped valid well center coordinates:", wellCenterCoordinates);
+
+        // 2nd Emptying Check: Post FOV calculation (before Calibration loop)
+        await checkSensorsAndHandleEmptying();
+        if (isAborted) { await executeAbortCleanup(); return; }
+
+        // 4. Flow-rate calibration & system cleaning
+        showLoading("Running flow-rate calibration & system cleaning...", {
+            showCountdown: false,
+            showAbort: true
+        });
+
+        let perfusion_times = [];
+        console.log(`Starting flow-rate calibration.`);
+        for (let current_reservoir = 1; current_reservoir <= 5; current_reservoir++) {
+
+            if (isAborted) { await executeAbortCleanup(); return; }
+            await checkSensorsAndHandleEmptying();
+
+            showLoading(`Calibrating flow-rate for reservoir ${current_reservoir}...`, {
+                showCountdown: false,
+                showAbort: true
+            });
+
+            try {
+                const calibResp = await fetch("/calibration", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sequence, current_reservoir })
+                });
+
+                if (!calibResp.ok) {
+                    throw new Error(`Server returned status code ${calibResp.status}`);
+                }
+
+                const calibData = await calibResp.json();
+                const calibValue = calibData.current_perfusion_time;
+
+                console.log(`Received perfusion time for reservoir ${current_reservoir}:`, calibValue);
+
+                if (calibValue !== null && calibValue !== undefined && !isNaN(calibValue)) {
+                    perfusion_times.push(Number(calibValue));
+                }
+
+                await checkSensorsAndHandleEmptying();
+
+            } catch (err) {
+                console.error(`Failed to get perfusion time for reservoir ${current_reservoir}:`, err);
+                return;
+            }
+        }
+
+        const perfusion_time_meanResp = await fetch("/get_perfusion_time", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ perfusion_times })
+        });
+
+        const perfusion_time_meanData = await perfusion_time_meanResp.json();
+        const perfusion_time_mean = perfusion_time_meanData.perfusion_time_mean;
+
+        console.log(`Mean:`, perfusion_time_mean);
+
+        // 3rd Emptying Check: Post calibration loop (before runtime estimation and setup)
+        await checkSensorsAndHandleEmptying();
+        if (isAborted) { await executeAbortCleanup(); return; }
+
+        // 5. Estimate experiment runtime
+        const estResp = await fetch("/estimate_experiment_time", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                volumes,
+                sequence,
+                range,
+                step,
+                observation_time,
+                plate_type,
+                perfusion_time_mean
+            })
+        });
+
+        const estData = await estResp.json();
+        const estimatedSeconds = estData.estimated_seconds;
+
+        ////////////////////////////
+        //// PERFUSION SEQUENCE ////
+        ////////////////////////////
+
+        if (isAborted) { await executeAbortCleanup(); return; }
+        await checkSensorsAndHandleEmptying();
+
+        showLoading("Running perfusion experiment...", {
+            showCountdown: true,
+            showAbort: true
+        });
+        startCountdown(estimatedSeconds);
+
+        if (liveOn) await toggleLive();
+
+        if (isAborted) { await executeAbortCleanup(); return; }
+        await checkSensorsAndHandleEmptying();
+
+        // Run Setup
+        const setupResp = await fetch("/run_setup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                exp_name,
+                path_to_exp_name,
+                observation_time,
+                time_interval_ms,
+                solution_names,
+                volumes,
+                sequence,
+                exposure_ms,
+                perfusion_time_mean,
+                plate_type,
+                auto_FOV,
+                manu_FOV
+            })
+        });
+
+        const setupData = await setupResp.json();
+        const num_images_per_well_max = setupData.num_images_per_well_max;
+        const solution_dict = setupData.solution_dict;
+
+        // 4th Emptying Check: Right before entering main perfusion loop
+        await checkSensorsAndHandleEmptying();
+        if (isAborted) { await executeAbortCleanup(); return; }
+
+        // Perfusion loop over valid wells only
+        for (let idx = 0; idx < validWells.length; idx++) {
+            const current_well = validWells[idx];
+            console.log("Starting with well:", current_well);
+
+            if (isAborted) { await executeAbortCleanup(); return; }
+            await checkSensorsAndHandleEmptying();
+
+            showLoading(`Running perfusion experiment for well ${current_well} of ${plate_type}...`, {
+                showCountdown: true,
+                showAbort: true
+            });
+
+            const resp = await fetch("/run_perfusion_experiment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    range,
+                    step,
+                    exp_name,
+                    observation_time,
+                    plate_type,
+                    order_type,
+                    sequence,
+                    solution_names,
+                    volumes,
+                    auto_FOV,
+                    manu_FOV,
+                    time_interval_ms,
+                    exposure_ms,
+                    saf_coordinates: [autofocusCoordinates[idx]],
+                    perfusion_time: perfusion_time_mean,
+                    well_coords: [wellCenterCoordinates[idx]],
+                    current_well,
+                    path_to_exp_name,
+                    num_images_per_well_max: setupData.num_images_per_well_max,
+                    solution_dict: setupData.solution_dict,
+                })
+            });
+
+            if (!resp.ok) {
+                throw new Error(`Server error: ${resp.status}`);
+            }
+
+            if (isAborted) { await executeAbortCleanup(); return; }
+            await checkSensorsAndHandleEmptying();
+
+            const data = await resp.json();
+            console.log("Server response:", data);
+        }
+
+        console.log("All perfusion experiments carried out successfully");
+
+        // 5th Emptying Check: Post perfusion loop (before finishing sequence)
+        await checkSensorsAndHandleEmptying();
+        if (isAborted) { await executeAbortCleanup(); return; }
+
+        // Run Finishing
+        await fetch("/run_finishing", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                exp_name,
+                path_to_exp_name,
+                well_coords: wellCenterCoordinates,
+            })
+        });
+
+    } catch (error) {
+        console.error("Error running perfusion experiment:", error);
+    } finally {
+        if (!isAborted) {
+            clearInterval(countdownInterval);
+            if (document.getElementById("countdownTimer")) {
+                document.getElementById("countdownTimer").innerText = "";
+            }
+            hideLoading();
+
+            alert("Experiment finished.");
+        }
+    }
+}
+
+// Create countdown timer for perfusion experiment
+let countdownInterval = null;
+function startCountdown(seconds) {
+    const timerEl = document.getElementById("countdownTimer");
+
+    let remaining = seconds;
+
+    clearInterval(countdownInterval);
+
+    function update() {
+        const min = Math.floor(remaining / 60);
+        const sec = Math.floor(remaining % 60);
+
+        timerEl.innerText =
+            `Estimated time remaining: ${min}:${sec.toString().padStart(2, "0")}`;
+
+        if (remaining <= 0) {
+            clearInterval(countdownInterval);
+            timerEl.innerText = "Finishing...";
+        }
+
+        remaining--;
+    }
+
+    update();
+    countdownInterval = setInterval(update, 1000);
+}
+
+// Create Experiment Abort Button
+let isAborted = false;
+async function abortExperiment() {
+    isAborted = true;
+    console.warn("Abort button clicked. Initiating cleanup...");
+    await executeAbortCleanup();
+}
+
+async function executeAbortCleanup() {
+    console.log("Executing abort cleanup tasks...");
+    showLoading("Aborting...");
+
+    try {
+        // Stop Flask backend operations instantly
+        await fetch("/abort_experiment", { method: "POST" });
+    } catch (err) {
+        console.error("Failed to notify backend of abort:", err);
+    }
+
+    // Clear UI timers or counters
+    if (typeof countdownInterval !== 'undefined') {
+        clearInterval(countdownInterval);
+    }
+    const timerElem = document.getElementById("countdownTimer");
+    if (timerElem) timerElem.innerText = "";
+
+    hideLoading();
+
+    alert("Experiment aborted successfully.");
+}
+
+// Initialize standard Server-Sent Events listener pointing to our Flask endpoint
+const eventSource = new EventSource('/z-stream');
+const zInput = document.getElementById('current_z');
+
+// Fires whenever the server yields a line of text starting with "data: "
+eventSource.onmessage = function(event) {
+    try {
+        const data = JSON.parse(event.data);
+        zInput.value = data.value;
+    } catch (err) {
+        console.error("Error parsing streaming data", err);
+    }
+};
+
+// Optional error handling (e.g. if Flask server restarts)
+eventSource.onerror = function(err) {
+    console.warn("Z-stream dropped. Reconnecting...", err);
+};
+
+// Flow-rate stream
+const flowEventSource = new EventSource('/flow-stream');
+const flowInput = document.getElementById('current_flow_rate');
+
+flowEventSource.onmessage = function(event) {
+    try {
+        const data = JSON.parse(event.data);
+        if (flowInput) {
+            let val = data.value;
+
+            // Filter low-flow jitter noise (< 5.0) to zero
+            if (typeof val === 'number') {
+                val = val < 5.0 ? "0.0" : val.toFixed(2);
+            }
+
+            flowInput.value = val;
+        }
+    } catch (err) {
+        console.error("Error parsing flow stream data:", err);
+    }
+};
+
+flowEventSource.onerror = function(err) {
+    console.warn("Flow-stream dropped. Reconnecting...", err);
+};
+
+async function run_clean_syringe_pumps() {
+    // 1. Prompt the user with the instruction alert
+    const confirmed = confirm(
+        "Disconnet both of the syringe pump tubings and but them into a beaker filled with at least 50 ml of 50 % ethanol 50 % DI water. Only then hit okay."
+    );
+
+    // Stop execution if the user cancels the alert
+    if (!confirmed) {
+        return;
+    }
+
+    // Get elements from your loading overlay HTML
+    const overlay = document.getElementById("loadingOverlay");
+    const loadingText = document.getElementById("loadingText");
+
+    // Store original text so we can restore it after completion
+    const originalText = loadingText.textContent;
+
+    try {
+        // 2. Show the loading overlay and update message
+        loadingText.textContent = "cleaning syringe pumps 1 and 2...";
+        overlay.style.display = "flex"; // Use "block" or "flex" depending on your CSS alignment
+
+        // 3. Send request to your Flask backend route
+        const response = await fetch('/clean-syringe-pumps', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Cleaning process failed.');
+        }
+
+        alert("Cleaning complete!");
+
+    } catch (error) {
+        console.error("Error cleaning syringe pumps:", error);
+        alert(`An error occurred: ${error.message}`);
+    } finally {
+        // 4. Hide the overlay and restore original text regardless of success/error
+        overlay.style.display = "none";
+        loadingText.textContent = originalText;
+    }
+}
+
+// --- Dynamic Perfusion Segmentation & Analysis Runner ---
+let cachedAnalysisData = null;
+let currentActiveSelector = null; // Tracks which well/figure is currently rendered
+
+// Global pointer variable to cleanly manage and clear this specific timer window
+let analysisTimerInterval = null;
+
+async function runAnalysis() {
+    const expNameInput = document.getElementById("exp_name");
+    const expName = expNameInput ? expNameInput.value.trim() : "";
+
+    if (!expName) {
+        alert("Please assign a valid Experiment Name inside section Perfusion Experiment before initializing analysis.");
+        return;
+    }
+
+    // Clear any previous analysis timers running just in case
+    if (analysisTimerInterval) clearInterval(analysisTimerInterval);
+
+    // Initial default fallback
+    let plateType = 6;
+    let totalSeconds = 180; // Default estimate (6 * 30s)
+
+    showLoading("Initializing Analysis Engine...");
+
+    // 1. Fetch metadata directly from the CSV log via our lightweight endpoint
+    try {
+        const metaResponse = await fetch(`/metadata/${encodeURIComponent(expName)}`);
+        if (metaResponse.ok) {
+            const metaData = await metaResponse.json();
+            if (metaData.plate_type) {
+                plateType = metaData.plate_type;
+                totalSeconds = plateType * 60;
+            }
+        }
+    } catch (e) {
+        console.warn("Could not pre-fetch CSV metadata. Defaulting countdown timer to 6-well parameters.", e);
+    }
+
+    // Show loading window shell and set up its unique timer parameters
+    const countdownEl = document.getElementById("countdownTimer");
+
+    showLoading("Running Cellpose Segmentation & Calculating Fluorescence Change...", {
+        showCountdown: true,
+        showAbort: false
+    });
+
+    const updateTimerDisplay = (secs) => {
+        const mins = Math.floor(secs / 60);
+        const remainingSecs = secs % 60;
+        countdownEl.innerText = `Estimated Time Remaining: ${mins}:${remainingSecs.toString().padStart(2, '0')}`;
+    };
+
+    updateTimerDisplay(totalSeconds);
+
+    // Begin the countdown sequence tracking frame
+    analysisTimerInterval = setInterval(() => {
+        totalSeconds--;
+        if (totalSeconds <= 0) {
+            clearInterval(analysisTimerInterval);
+            countdownEl.innerText = "Finishing processing details...";
+        } else {
+            updateTimerDisplay(totalSeconds);
+        }
+    }, 1000);
+
+    // 2. Perform the heavy lifting analysis
+    try {
+        const formData = new FormData();
+        formData.append("exp_name", expName);
+
+        const response = await fetch("/analyze", {
+            method: "POST",
+            body: formData
+        });
+
+        // Safe Single Stream Read: Read raw text first
+        const responseText = await response.text();
+
+        // Parse JSON safely
+        let data = null;
+        try {
+            data = JSON.parse(responseText);
+        } catch {
+            data = null;
+        }
+
+        // Handle HTTP Error status
+        if (!response.ok) {
+            const errorMsg = (data && data.message)
+                ? data.message
+                : (responseText || `Server responded with status ${response.status}`);
+            throw new Error(errorMsg);
+        }
+
+        cachedAnalysisData = data;
+
+        // Guaranteed alignment with CSV value
+        const titleBox = document.getElementById("analysis-title");
+        if (titleBox) {
+            titleBox.innerText = `Mean Fluorescence Intensity (${data.plate_type}-Well Mode)`;
+        }
+
+        generatePlateSelectorGrid(data.plate_type, data.grid, expName);
+
+        if (data.grid && data.grid.length > 0) {
+            const firstWellLabel = data.grid[0].label;
+            const defaultRadio = document.getElementById(`chk-well-${firstWellLabel}`);
+            if (defaultRadio) {
+                defaultRadio.checked = true;
+                currentActiveSelector = defaultRadio;
+                renderActiveView("well", data.grid[0]);
+            }
+        } else {
+            const viewer = document.getElementById("active-well-viewer");
+            if (viewer) {
+                viewer.innerHTML = `<p class="unit" style="text-align: center;">No successfully processed wells found.</p>`;
+            }
+        }
+
+        document.getElementById("analysis-results-card").style.display = "block";
+        document.getElementById("selector-card").style.display = "block";
+
+        // Display cache notice popup if no fresh analysis was executed
+        if (data.is_cached) {
+            alert(
+                `WARNING: \n\nAnalysis data for "${expName}" was already present and loaded from cache.\n\n` +
+                `If you want to re-run the analysis from scratch, go to the experiment folder and delete the "analysis" directory.`
+            );
+        }
+
+        // Trigger path notification upon load/completion
+        displaySavePath(expName);
+
+    } catch (err) {
+        console.error("Analysis Pipeline Exception:", err);
+        alert("An error occurred during experiment data parsing:\n" + err.message);
+    } finally {
+        // CLEANUP: Stop interval timer and reset UI loading states
+        if (analysisTimerInterval) {
+            clearInterval(analysisTimerInterval);
+            analysisTimerInterval = null;
+        }
+        if (countdownEl) countdownEl.innerText = "";
+        const overlay = document.getElementById("loadingOverlay");
+        if (overlay) overlay.style.display = "none";
+        if (typeof hideLoading === "function") hideLoading();
+    }
+}
+
+function displaySavePath(expName) {
+    const banner = document.getElementById("save-path-banner");
+    const fullPath = `D:\\Automated_Bath_Perfusion_Experiments\\${expName}\\analysis`;
+
+    banner.innerHTML = `Saved to: <span>${fullPath}</span>`;
+    banner.style.display = "block";
+}
+
+/**
+ * Creates a physical microplate grid representation of checkboxes
+ */
+function generatePlateSelectorGrid(plateType, processedGrid, expName) {
+    const selectorGrid = document.getElementById("well-selector-grid");
+    selectorGrid.innerHTML = ""; // Reset older views
+
+    // Handle columns and layout density structure classes dynamically
+    if (plateType === 24) {
+        selectorGrid.style.gridTemplateColumns = "repeat(6, 1fr)";
+    } else if (plateType === 12) {
+        selectorGrid.style.gridTemplateColumns = "repeat(4, 1fr)";
+    } else {
+        selectorGrid.style.gridTemplateColumns = "repeat(3, 1fr)";
+    }
+
+    const processedMap = new Map(processedGrid.map(w => [w.label, w]));
+
+    const rows = plateType === 24 ? ['A', 'B', 'C', 'D'] : plateType === 12 ? ['A', 'B', 'C'] : ['A', 'B'];
+    const cols = plateType === 24 ? [1, 2, 3, 4, 5, 6] : plateType === 12 ? [1, 2, 3, 4] : [1, 2, 3];
+
+    rows.forEach(r => {
+        cols.forEach(c => {
+            const wellLabel = `${r}${c}`;
+            const isProcessed = processedMap.has(wellLabel);
+            const wellData = processedMap.get(wellLabel);
+
+            const labelWrapper = document.createElement("label");
+            labelWrapper.className = "well-selector-item";
+
+            labelWrapper.innerHTML = `
+                <span class="well-label">Well ${wellLabel}</span>
+                <input type="checkbox"
+                       id="chk-well-${wellLabel}"
+                       name="well-selector"
+                       value="${wellLabel}"
+                       ${!isProcessed ? "disabled" : ""}
+                       onchange="handleSelectorChange(this)">
+            `;
+
+            if (isProcessed) {
+                const input = labelWrapper.querySelector("input");
+                input.dataset.wellJson = JSON.stringify(wellData);
+            }
+
+            selectorGrid.appendChild(labelWrapper);
+        });
+    });
+
+    const allMeansChk = document.getElementById("chk-all-means");
+    allMeansChk.checked = false;
+    allMeansChk.dataset.allMeansUrl = `/data_route/${expName}/analysis/all_wells_means.png`;
+}
+
+/**
+ * Monitors configuration changes. Automatically unchecks prior options
+ * to ensure only one specific diagnostic panel is displayed at a time.
+ */
+function handleSelectorChange(element) {
+    if (!element.checked) {
+        // Prevent unchecking the active item completely (forces at least one active view)
+        element.checked = true;
+        return;
+    }
+
+    // Uncheck previous selection
+    if (currentActiveSelector && currentActiveSelector !== element) {
+        currentActiveSelector.checked = false;
+    }
+    currentActiveSelector = element;
+
+    // Handle Route A: Plate summary mean values
+    if (element.value === "all-means") {
+        renderActiveView("summary", { trajectory_url: element.dataset.allMeansUrl });
+        return;
+    }
+
+    // Handle Route B: Singular active well metrics
+    if (element.dataset.wellJson) {
+        const wellData = JSON.parse(element.dataset.wellJson);
+        renderActiveView("well", wellData);
+    }
+}
+
+/**
+ * Swaps out contents of the active viewport card using classes
+ */
+function renderActiveView(mode, data) {
+    const viewport = document.getElementById("active-well-viewer");
+    const timestamp = new Date().getTime();
+
+    if (mode === "summary") {
+        viewport.innerHTML = `
+            <h4 class="header" style="background: rgba(46, 125, 107, 0.15); border: 1px solid #2e7d6b; padding: 8px; border-radius: 4px; color: #ffffff; text-align: center; margin: 0 0 16px 0;">
+                Cumulative Plate Summary - All Wells Mean Trajectories
+            </h4>
+            <div style="display: flex; justify-content: center;">
+                <img src="${data.trajectory_url}?t=${timestamp}"
+                     alt="All Wells Means Kinetic Graph"
+                     onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<p class=\'unit\' style=\'padding: 24px; text-align:center;\'>Combined summary figure not generated or missing data.</p>';"
+                     style="width: 100%; max-width: 800px; border-radius: 4px; border: 1px solid #27272a; background: #ffffff;">
+            </div>
+        `;
+    } else {
+        // Reset toggle checkbox state to false (Kinetic view) when switching wells
+        const toggleCheckbox = document.getElementById('chk-view-toggle');
+        if (toggleCheckbox) toggleCheckbox.checked = false;
+
+        viewport.innerHTML = `
+            <!-- Kinetic Trajectory Figure (Default View) -->
+            <div id="view-kinetic-trajectory" style="display: block;">
+                <img id="img-kinetic-trajectory"
+                     src="${data.trajectory_url}?t=${timestamp}"
+                     alt="Kinetic Trajectory Plot - Well ${data.label}"
+                     style="width: 100%; max-width: 800px; height: auto; border-radius: 4px; border: 1px solid #27272a; background: #ffffff; display: block; margin: 0 auto;">
+            </div>
+
+            <!-- Segmentation Overlay Figure (Hidden by Default) -->
+            <div id="view-segmentation-overlay" style="display: none;">
+                <img id="img-segmentation-overlay"
+                     src="${data.overlay_url}?t=${timestamp}"
+                     alt="Segmentation Overlay Plot - Well ${data.label}"
+                     style="width: 100%; max-width: 800px; height: auto; border-radius: 4px; border: 1px solid #27272a; background: #ffffff; display: block; margin: 0 auto;">
+            </div>
+        `;
+    }
+}
+
+function toggleWellView(showSegmentation) {
+    const kineticView = document.getElementById('view-kinetic-trajectory');
+    const segmentationView = document.getElementById('view-segmentation-overlay');
+
+    if (showSegmentation) {
+        kineticView.style.display = 'none';
+        segmentationView.style.display = 'block';
+    } else {
+        kineticView.style.display = 'block';
+        segmentationView.style.display = 'none';
+    }
+}
+
+// Reset view state when loading a new well
+function resetWellView() {
+    const toggleCheckbox = document.getElementById('chk-view-toggle');
+    if (toggleCheckbox) {
+        toggleCheckbox.checked = false;
+        toggleWellView(false); // Force return to kinetic trajectory view
+    }
+}
+
+function switchWellView(selectedView) {
+    const kineticView = document.getElementById('view-kinetic-trajectory');
+    const segmentationView = document.getElementById('view-segmentation-overlay');
+    const buttons = document.querySelectorAll('#view-mode-toggle .segmented-btn');
+
+    // Update active button state
+    buttons.forEach(btn => {
+        if (btn.dataset.view === selectedView) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Toggle viewport visibility
+    if (selectedView === 'segmentation') {
+        if (kineticView) kineticView.style.display = 'none';
+        if (segmentationView) segmentationView.style.display = 'block';
+    } else {
+        if (kineticView) kineticView.style.display = 'block';
+        if (segmentationView) segmentationView.style.display = 'none';
+    }
+}
+
+// Exit app
+function exitApp() {
+    fetch("/exit", { method: "POST" })
+        .then(response => {
+            // Attempt to close the current tab/window
+            window.close();
+
+            // Fallback: If window.close() is blocked by browser security,
+            // render a clear status message directly on the page
+            setTimeout(() => {
+                document.body.innerHTML = "<h2 style='font-family: sans-serif; text-align: center; margin-top: 20%;'>Server stopped. You can safely close this tab.</h2>";
+            }, 300);
+        })
+        .catch(err => {
+            console.error("Error shutting down server:", err);
+        });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manual FOV Selector</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #222; color: #fff; margin: 0; padding: 20px; }
+        img { max-width: 90vw; max-height: 70vh; border: 2px solid #555; background: #000; }
+        .controls { margin-top: 15px; }
+        button { font-size: 16px; padding: 10px 20px; margin: 0 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h3 id="statusText">Adjust FOV Position</h3>
+    <img id="preview" src="" alt="Live Feed">
+    <div class="controls">
+        <button onclick="confirmFOV(false)">Abort / Cancel</button>
+        <button onclick="confirmFOV(true)" style="background: #28a745; color: white;">Confirm FOV</button>
+    </div>
+
+    <script>
+        let liveInterval = setInterval(async () => {
+            try {
+                const resp = await fetch("/snap_live");
+                if (resp.ok) {
+                    const blob = await resp.blob();
+                    const img = document.getElementById("preview");
+                    if (img.src) URL.revokeObjectURL(img.src);
+                    img.src = URL.createObjectURL(blob);
+                }
+            } catch (e) { console.error(e); }
+        }, 200);
+
+        function confirmFOV(status) {
+            clearInterval(liveInterval);
+            if (window.opener) {
+                window.opener.postMessage({ type: "MANUAL_FOV_RESULT", confirmed: status }, "*");
+            }
+            window.close();
+        }
+    </script>
+</body>
+</html>
