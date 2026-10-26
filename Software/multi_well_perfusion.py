@@ -567,7 +567,7 @@ def flow_rate_calibration(reservoir_no, ecu, ser, latest_telemetry, telemetry_lo
     send_command_and_wait(ser, b"A 0\n")
     time.sleep(0.5)
     send_command_and_wait(ser, b"M 80\n")
-    send_command(ser, b"DELAY 18000\n")
+    send_command(ser, b"DELAY 15000\n")
     send_command(ser, b"1F\n")
 
     time.sleep(1)
@@ -617,11 +617,11 @@ def perfuse_volume(ecu, target_volume_ul, latest_telemetry, telemetry_lock):
 
     finally:
         ecu.disable_all()
-        mean_rate = np.mean(flow_rates) if flow_rates else 0.0
-        std_rate = np.std(flow_rates) if flow_rates else 0.0
-        print(
-            f"Stopped. Flow-rate: {mean_rate:.2f} SD: {std_rate:.2f} | Total: {current_volume:.2f}/{target_volume_ul} ul",
-            end='\r')
+        #mean_rate = np.mean(flow_rates) if flow_rates else 0.0
+        #std_rate = np.std(flow_rates) if flow_rates else 0.0
+        #print(
+        #    f"Stopped. Flow-rate: {mean_rate:.2f} SD: {std_rate:.2f} | Total: {current_volume:.2f}/{target_volume_ul} ul",
+        #    end='\r')
 
         return time.time() - t0
 
@@ -919,7 +919,7 @@ def perfusion_sequence(
 
     print("\n")
     log_event(log_file_path, f"Flushing {V_WASH_UL:.0f} ul {solution_dict[2]} to waste")
-    print(f"Flushing {V_WASH_UL:.0f} ul {solution_dict[1]} to waste")
+    print(f"Flushing {V_WASH_UL:.0f} ul {solution_dict[2]} to waste")
     perf_time = flow_rate_calibration(
         2,
         ecu,
@@ -1090,15 +1090,15 @@ from pathlib import Path
 def parse_well_timings(log_path, well_num):
     """
     Parses the experiment log to find:
-      1. The imaging frequency (in seconds) for the well.
-      2. The relative times (in seconds) from imaging start when each solution was perfused.
+    1. The imaging frequency (in seconds) for the well.
+    2. The relative times (in seconds) from imaging start when each solution was perfused or vacuumed.
     """
     if not Path(log_path).exists():
         return 1.0, []  # default 1s step, no events
 
     start_time = None
     img_freq_s = 1.0  # default
-    perfusions = []  # list of dicts: {"time": float, "solution": str}
+    events = []  # list of dicts: {"time": float, "solution": str, "type": str}
 
     # Time parser helper with quotes stripping and fallback formatting
     def parse_dt(ts_str):
@@ -1149,11 +1149,20 @@ def parse_well_timings(log_path, well_num):
                     elapsed_seconds = (perf_time - start_time).total_seconds()
                     # Clean solution name
                     sol_name = parts[-1].strip().strip('"')
-                    perfusions.append({"time": elapsed_seconds, "solution": sol_name})
+                    events.append({"time": elapsed_seconds, "solution": sol_name, "type": "perfusion"})
                 except Exception as e:
                     print(f"Error parsing perfusion step on line '{line.strip()}': {e}")
 
-    return img_freq_s, perfusions
+            # 3. Capture vacuuming times
+            elif "vacuuming" in message and start_time is not None:
+                try:
+                    vac_time = parse_dt(timestamp_str)
+                    elapsed_seconds = (vac_time - start_time).total_seconds()
+                    events.append({"time": elapsed_seconds, "solution": "aspirating", "type": "vacuum"})
+                except Exception as e:
+                    print(f"Error parsing vacuuming step on line '{line.strip()}': {e}")
+
+    return img_freq_s, events
 
 
 def get_global_y_limits(analysis_dir, default_lims=(-0.1, 2.0)):
@@ -1223,7 +1232,7 @@ def generate_cumulative_plot(analysis_dir):
         print("[PLOTTER] Aborting: No result_well_*.json files found in analysis directory.")
         return False
 
-    # --- INLINE LOG PARSING HELPER ---
+    # --- INLINE LOG PARSING HELPER (Aligned with parse_well_timings) ---
     def parse_well_timings_inline(log_path, well_num):
         from datetime import datetime
         log_path = Path(log_path)
@@ -1233,7 +1242,7 @@ def generate_cumulative_plot(analysis_dir):
 
         start_time = None
         img_freq_s = 1.0
-        perfusions = []
+        events = []
 
         def parse_dt(ts_str):
             cleaned = ts_str.strip().strip('"').strip("'")
@@ -1247,7 +1256,7 @@ def generate_cumulative_plot(analysis_dir):
                 lines = f.readlines()
         except Exception as e:
             print(f"[PLOTTER] Failed to read log file: {e}")
-            return img_freq_s, perfusions
+            return img_freq_s, events
 
         well_active = False
         for line in lines:
@@ -1281,11 +1290,19 @@ def generate_cumulative_plot(analysis_dir):
                         perf_time = parse_dt(timestamp_str)
                         elapsed_seconds = (perf_time - start_time).total_seconds()
                         sol_name = parts[-1].strip().strip('"')
-                        perfusions.append({"time": elapsed_seconds, "solution": sol_name})
+                        events.append({"time": elapsed_seconds, "solution": sol_name, "type": "perfusion"})
                     except Exception as e:
-                        print(f"[PLOTTER] Error parsing perfusion on line '{line.strip()}': {e}")
+                        print(f"[PLOTTER] Error parsing perfusion step on line '{line.strip()}': {e}")
 
-        return img_freq_s, perfusions
+                elif "vacuuming" in message and start_time is not None:
+                    try:
+                        vac_time = parse_dt(timestamp_str)
+                        elapsed_seconds = (vac_time - start_time).total_seconds()
+                        events.append({"time": elapsed_seconds, "solution": "aspirating", "type": "vacuum"})
+                    except Exception as e:
+                        print(f"[PLOTTER] Error parsing vacuuming step on line '{line.strip()}': {e}")
+
+        return img_freq_s, events
 
     # --- MAIN PLOTTING LOGIC ---
     plt.figure(figsize=(8, 4.5))
@@ -1300,7 +1317,7 @@ def generate_cumulative_plot(analysis_dir):
     try:
         first_well_num = int(sorted(result_files)[0].stem.split("_")[-1])
         img_freq_s, reference_perfusions = parse_well_timings_inline(log_path, first_well_num)
-        print(f"[PLOTTER] Extracted timing schema: Freq={img_freq_s}s, Perfusions={reference_perfusions}")
+        print(f"[PLOTTER] Extracted timing schema: Freq={img_freq_s}s, Events={reference_perfusions}")
     except Exception as e:
         print(f"[PLOTTER] Reference timing parser failed: {e}")
         img_freq_s, reference_perfusions = 1.0, []
@@ -1363,7 +1380,7 @@ def generate_cumulative_plot(analysis_dir):
         "#f59e0b",  # Amber/Orange
         "#a855f7",  # Purple
         "#06b6d4",  # Cyan
-        "#f43f5e"  # Rose/Red
+        "#f43f5e"   # Rose/Red
     ]
     solution_to_color_map = {}
     color_idx = 0
@@ -1376,11 +1393,14 @@ def generate_cumulative_plot(analysis_dir):
         raw_name = event["solution"].strip()
         norm_name = raw_name.lower()
 
-        if norm_name not in solution_to_color_map:
-            solution_to_color_map[norm_name] = color_cycle[color_idx % len(color_cycle)]
-            color_idx += 1
-
-        line_color = solution_to_color_map[norm_name]
+        # Handle vacuum/aspiration vs standard perfusion coloring
+        if event.get("type") == "vacuum":
+            line_color = "#d4d4d8"  # Light grey for aspirating steps
+        else:
+            if norm_name not in solution_to_color_map:
+                solution_to_color_map[norm_name] = color_cycle[color_idx % len(color_cycle)]
+                color_idx += 1
+            line_color = solution_to_color_map[norm_name]
 
         # Draw line
         plt.axvline(x=t_event, color=line_color, linestyle="--", alpha=0.6, linewidth=1.2)

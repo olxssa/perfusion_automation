@@ -4,8 +4,8 @@
 
 *Design and implementation of an automated high-content screening cell perfusion system, including associated control software*
 
-Here, the design, implementation and benchmarking of a fully integrated screening platform for automated bath perfusion experiments is documented. 
-The system was developed to provide reproducible and sample-friendly solution exchange for kinetic biosensor characterization.
+Here, the design, implementation and benchmarking of a fully integrated, modular screening platform for automated, multiplexed bath perfusion experiments is documented. 
+The system was developed to provide reproducible and sample-friendly solution exchange for optical characterization of biosensors.
 
 The platform consists of three primary systems: a modular fluorescence microscope, an automated bath perfusion add-on, and an integrated hardware and software control framework. 
 

@@ -320,12 +320,14 @@ if __name__ == "__main__":
                     raw_name = event["solution"].strip()
                     norm_name = raw_name.lower()
 
-                    # Assign color dynamically by name
-                    if norm_name not in solution_to_color_map:
-                        solution_to_color_map[norm_name] = colors[color_idx % len(colors)]
-                        color_idx += 1
-
-                    line_color = solution_to_color_map[norm_name]
+                    # Assign line color and styling based on event type
+                    if event.get("type") == "vacuum":
+                        line_color = "#d4d4d8"  # Light grey for aspirating
+                    else:
+                        if norm_name not in solution_to_color_map:
+                            solution_to_color_map[norm_name] = colors[color_idx % len(colors)]
+                            color_idx += 1
+                        line_color = solution_to_color_map[norm_name]
 
                     # Vertical indicator line
                     ax_traj.axvline(x=t_event, color=line_color, linestyle="--", alpha=0.8,

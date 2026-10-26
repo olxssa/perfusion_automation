@@ -638,7 +638,7 @@ def emptying():
         target_str = str(data.get("waste_id", "all")).lower()
         pumps = [int(p) for p in ["1", "2"] if p in target_str] or [1, 2]
 
-        send_command(hw.ser, b'DELAY 2000\n')
+        send_command(hw.ser, b'DELAY 3500\n')
         for pump in pumps:
             cmd = f"{pump}D-11000\n".encode('utf-8')
             send_command(hw.ser, f"VALVE{pump}_ON\n".encode('utf-8'))
