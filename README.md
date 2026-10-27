@@ -121,9 +121,7 @@ For each well, except for the starting position A1, a course scan followed by a 
 
 <img src="/Figures/GFP_w.png" width="500">
 
-[//]: # (GFP Caption)
-
-[//]: # (Add NEMO Data + NEMO Caption)
+Bath perfusion experiment with GFP (plasmid ID 25-07) tagged ND cells. (**A**) Fluorescence overlay with segmented masks detected by Cellpose. The green outlines are the cells labeled as fluorescent, the black outlines show the rest of the segmented cells. (**B**) Physiological fluorescence intensity change / SBR of single cells (grey) and mean (red). (**C**) Mean trajectories of all wells for comparison.
 
 ### References
 
