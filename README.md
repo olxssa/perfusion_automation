@@ -35,7 +35,7 @@ which bridges the Python backend to a headless Java-based Micro-Manager [2] (v2.
 The Micro-Manager instance is created using the config file MMConfig.cfg.
 
 ### Software
-<img src="/Figures/web_app_structure_.png" width="920">
+<img src="/Figures/web_app_structure.png" width="920">
 
 After the build, the setup can be controlled via a custom-developed web application called "Automated Bath Perfusion App". 
 The web application serves as a single-page dashboard designed to organize all operational controls into three dedicated panels arranged from left to right:
@@ -119,7 +119,7 @@ Modularity allows for interchangeable reservoir sizes to accommodate varying exp
 Software autofocus performance throughout a 6-well plate. 
 For each well, except for the starting position A1, a course scan followed by a fine scan are carried out as shown on the left, resulting in a focussed sample shown on the right of each well.
 
-<img src="/Figures/GFP_w.png" width="500">
+<img src="/Figures/GFP.png" width="500">
 
 Bath perfusion experiment with GFP (plasmid ID 25-07) tagged ND cells. (**A**) Fluorescence overlay with segmented masks detected by Cellpose. The green outlines are the cells labeled as fluorescent, the black outlines show the rest of the segmented cells. (**B**) Physiological fluorescence intensity change / SBR of single cells (grey) and mean (red). (**C**) Mean trajectories of all wells for comparison.
 
