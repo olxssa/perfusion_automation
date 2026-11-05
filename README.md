@@ -119,9 +119,12 @@ Modularity allows for interchangeable reservoir sizes to accommodate varying exp
 Software autofocus performance throughout a 6-well plate. 
 For each well, except for the starting position A1, a course scan followed by a fine scan are carried out as shown on the left, resulting in a focussed sample shown on the right of each well.
 
-<img src="/Figures/GFP.png" width="500">
+<div style="display: flex; align-items: center; gap: 20px;">
+  <img src="/Figures/GFP.png" width="500">
+  <img src="/Figures/HEK_cytoNEMO_221026.gif" width="250">
+</div>
 
-Bath perfusion experiment with GFP (plasmid ID 25-07) tagged ND cells. (**A**) Fluorescence overlay with segmented masks detected by Cellpose. The green outlines are the cells labeled as fluorescent, the black outlines show the rest of the segmented cells. (**B**) Physiological fluorescence intensity change / SBR of single cells (grey) and mean (red). (**C**) Mean trajectories of all wells for comparison.
+Bath perfusion experiment with GFP (left) and NEMO (right) tagged ND cells. (**A**) Fluorescence overlay with segmented masks detected by Cellpose. The green outlines are the cells labeled as fluorescent, the black outlines show the rest of the segmented cells. (**B**) Physiological fluorescence intensity change / SBR of single cells (grey) and mean (red). (**C**) Mean trajectories of all wells for comparison.
 
 ### References
 
