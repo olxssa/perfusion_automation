@@ -24,7 +24,7 @@ from multi_well_perfusion import *
 # ==========================================
 
 class HardwareController:
-    """Encapsulates Micro-Manager core, serial connections, and hardware state."""
+    """Contains Micro-Manager core, serial connections, and hardware state."""
 
     print("Initializing hardware...")
 

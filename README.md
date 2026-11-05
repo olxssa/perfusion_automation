@@ -131,7 +131,14 @@ reproducible microscope control,” Nat Methods, vol. 18, 226–228, 2021. DOI: 
 [2] A. D. Edelstein, M. A. Tsuchida, N. Amodaj, H. Pinkard, R. D. Vale, and N. Stuurman, “Advanced methods of
 microscope control using μmanager software,” Journal of Biological Methods, 2014. DOI: 10.14440/jbm.2014.36.
 
+[3] J. Li, Z. Shang, J. H. Chen, et al., “Engineering of nemo as calcium indicators with large dynamics and high
+sensitivity,” Nature Methods, vol. 20, pp. 918–924, 2023. DOI: 10.1038/s41592-023-01852-9.
+
+[4] P. Dettinger, T. Kull, G. Arekatla, et al., “Open-source personal pipetting robots with live-cell incubation and
+microscopy compatibility,” Nature Communications, vol. 13, no. 1, p. 2999, 2022. DOI: 10.1038/s41467-
+022-30643-7.
+
 ### Demonstration Video: 
-[![](https://img.youtube.com/vi/6NS1tuH9CTA/0.jpg)](https://youtu.be/6NS1tuH9CTA "Click to play on Youtube.com") Version: March 2026
+[![](https://img.youtube.com/vi/qQ-0yxycoEU/0.jpg)](https://youtu.be/qQ-0yxycoEU "Click to play on Youtube.com") Version: October 2026
 
 Click on image to play on Youtube.com
