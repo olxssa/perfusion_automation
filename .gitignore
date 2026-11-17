@@ -4,6 +4,7 @@
 # Python
 __pycache__/
 *.py[cod]
+*.ipynb
 .venv/
 venv/
 env/
