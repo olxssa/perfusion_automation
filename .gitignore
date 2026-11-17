@@ -18,6 +18,9 @@ htmlcov/
 .env.*
 !.env.example
 
+# JetBrains IDE settings
+.idea/
+
 # KiCad and FreeCAD local files
 *.kicad_prl
 *.FCStd[0-9]*
