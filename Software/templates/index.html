@@ -1986,9 +1986,6 @@ function displaySavePath(expName) {
     banner.style.display = "block";
 }
 
-/**
- * Creates a physical microplate grid representation of checkboxes
- */
 function generatePlateSelectorGrid(plateType, processedGrid, expName) {
     const selectorGrid = document.getElementById("well-selector-grid");
     selectorGrid.innerHTML = ""; // Reset older views
@@ -2040,10 +2037,6 @@ function generatePlateSelectorGrid(plateType, processedGrid, expName) {
     allMeansChk.dataset.allMeansUrl = `/data_route/${expName}/analysis/all_wells_means.png`;
 }
 
-/**
- * Monitors configuration changes. Automatically unchecks prior options
- * to ensure only one specific diagnostic panel is displayed at a time.
- */
 function handleSelectorChange(element) {
     if (!element.checked) {
         // Prevent unchecking the active item completely (forces at least one active view)

@@ -119,9 +119,12 @@ Modularity allows for interchangeable reservoir sizes to accommodate varying exp
 Software autofocus performance throughout a 6-well plate. 
 For each well, except for the starting position A1, a course scan followed by a fine scan are carried out as shown on the left, resulting in a focussed sample shown on the right of each well.
 
-<img src="/Figures/GFP.png" width="500">
+<div style="display: flex; align-items: center; gap: 20px;">
+  <img src="/Figures/GFP.png" width="500">
+  <img src="/Figures/HEK_cytoNEMO_221026.gif" width="250">
+</div>
 
-Bath perfusion experiment with GFP (plasmid ID 25-07) tagged ND cells. (**A**) Fluorescence overlay with segmented masks detected by Cellpose. The green outlines are the cells labeled as fluorescent, the black outlines show the rest of the segmented cells. (**B**) Physiological fluorescence intensity change / SBR of single cells (grey) and mean (red). (**C**) Mean trajectories of all wells for comparison.
+Bath perfusion experiment with GFP (left) and NEMO (right) tagged ND cells. (**A**) Fluorescence overlay with segmented masks detected by Cellpose. The green outlines are the cells labeled as fluorescent, the black outlines show the rest of the segmented cells. (**B**) Physiological fluorescence intensity change / SBR of single cells (grey) and mean (red). (**C**) Mean trajectories of all wells for comparison.
 
 ### References
 
@@ -131,7 +134,14 @@ reproducible microscope control,” Nat Methods, vol. 18, 226–228, 2021. DOI: 
 [2] A. D. Edelstein, M. A. Tsuchida, N. Amodaj, H. Pinkard, R. D. Vale, and N. Stuurman, “Advanced methods of
 microscope control using μmanager software,” Journal of Biological Methods, 2014. DOI: 10.14440/jbm.2014.36.
 
+[3] J. Li, Z. Shang, J. H. Chen, et al., “Engineering of nemo as calcium indicators with large dynamics and high
+sensitivity,” Nature Methods, vol. 20, pp. 918–924, 2023. DOI: 10.1038/s41592-023-01852-9.
+
+[4] P. Dettinger, T. Kull, G. Arekatla, et al., “Open-source personal pipetting robots with live-cell incubation and
+microscopy compatibility,” Nature Communications, vol. 13, no. 1, p. 2999, 2022. DOI: 10.1038/s41467-
+022-30643-7.
+
 ### Demonstration Video: 
-[![](https://img.youtube.com/vi/6NS1tuH9CTA/0.jpg)](https://youtu.be/6NS1tuH9CTA "Click to play on Youtube.com") Version: March 2026
+[![](https://img.youtube.com/vi/qQ-0yxycoEU/0.jpg)](https://youtu.be/qQ-0yxycoEU "Click to play on Youtube.com") Version: October 2026
 
 Click on image to play on Youtube.com

@@ -80,7 +80,7 @@ body {
 
 .card {
     background: #18181b;
-    padding: 8px 16px 16px 16px; /* Top, Right, Bottom, Left */
+    padding: 8px 16px 16px 16px;
     border-radius: 6px;
     border: 1px solid #27272a;
     margin-bottom: 16px;
@@ -147,15 +147,15 @@ button:hover {
 
 .button-group {
     display: flex;
-    gap: 10px;            /* Space between buttons */
-    justify-content: flex-start; /* Align to the right (use flex-start for left) */
-    margin-top: 15px;     /* Optional spacing above buttons */
+    gap: 10px;
+    justify-content: flex-start;
+    margin-top: 15px;
 }
 
 .button-container {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Adjust vertical spacing here */
+    gap: 10px;
 }
 
 select {
@@ -217,7 +217,7 @@ select {
     width: 50%;
     font-size: 12px;
     display: block;
-    margin: 0 auto; /* Centers the block horizontally */
+    margin: 0 auto;
 }
 
 .btn-run.stop-state {
@@ -246,7 +246,7 @@ select {
 
     /* Layout & Centering */
     height: 31px !important;
-    width: auto !important; /* Auto-expands for full text visibility */
+    width: auto !important;
     padding: 0 12px !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -516,7 +516,7 @@ select {
 }
 
 #instructionModal .modal-content h3 {
-    color: #4180bf !important; /* Standard bright blue (or use #2c3e50 / #1a73e8) */
+    color: #4180bf !important;
 }
 
 .modal-content button {
